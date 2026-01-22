@@ -360,6 +360,113 @@ const CFOCharts = {
       this.charts.loanProduct.data.datasets[0].data = products.map(([, count]) => count);
       this.charts.loanProduct.update();
     }
+
+    // Update Route Charts
+    if (this.charts.cfoRoutes && data && data.transactions) {
+      const byRoute = {};
+      data.transactions.forEach(t => {
+        const route = t.route || 'Unknown';
+        byRoute[route] = (byRoute[route] || 0) + 1;
+      });
+      
+      this.charts.cfoRoutes.data.labels = Object.keys(byRoute);
+      this.charts.cfoRoutes.data.datasets[0].data = Object.values(byRoute);
+      this.charts.cfoRoutes.update();
+    }
+
+    if (this.charts.cfoRouteSuccess && data && data.transactions) {
+      const routePerformance = {};
+      data.transactions.forEach(t => {
+        const route = t.route || 'Unknown';
+        if (!routePerformance[route]) {
+          routePerformance[route] = { total: 0, success: 0 };
+        }
+        routePerformance[route].total++;
+        if (t.transaction_status === 'Success' || t.transaction_status === 'Successful') {
+          routePerformance[route].success++;
+        }
+      });
+      
+      const routeLabels = Object.keys(routePerformance);
+      const successRates = routeLabels.map(route => {
+        const perf = routePerformance[route];
+        return perf.total > 0 ? (perf.success / perf.total) * 100 : 0;
+      });
+      
+      this.charts.cfoRouteSuccess.data.labels = routeLabels;
+      this.charts.cfoRouteSuccess.data.datasets[0].data = successRates;
+      this.charts.cfoRouteSuccess.update();
+    }
+  },
+
+  // Initialize Route Charts
+  initRouteCharts() {
+    // Transaction Routes Chart
+    const routesCtx = document.getElementById('cfo-routes-chart');
+    if (routesCtx) {
+      this.charts.cfoRoutes = new Chart(routesCtx, {
+        type: 'doughnut',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+            backgroundColor: ['#3b82f6', '#059669', '#f59e0b', '#7c3aed', '#ec4899'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#8b949e', usePointStyle: true }
+            }
+          }
+        }
+      });
+    }
+
+    // Route Success Rate Chart
+    const successCtx = document.getElementById('cfo-route-success-chart');
+    if (successCtx) {
+      this.charts.cfoRouteSuccess = new Chart(successCtx, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Success Rate (%)',
+            data: [],
+            backgroundColor: '#059669',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(48, 54, 61, 0.5)' },
+              ticks: { color: '#8b949e' }
+            },
+            y: {
+              grid: { color: 'rgba(48, 54, 61, 0.5)' },
+              ticks: { 
+                color: '#8b949e',
+                callback: val => val + '%'
+              },
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+    }
   },
 
   // Destroy all charts
