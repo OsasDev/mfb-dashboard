@@ -370,6 +370,25 @@
     </main>
   </div>
 
+  <!-- Customer Detail Modal -->
+  <div class="modal-overlay" id="customer-detail-modal" data-testid="customer-detail-modal">
+    <div class="modal" style="max-width: 900px; max-height: 90vh;">
+      <div class="modal-header">
+        <h2 class="modal-title">Customer Profile</h2>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="customer-detail-content" data-testid="customer-detail-content" style="max-height: 70vh; overflow-y: auto;">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="App.hideModal('customer-detail-modal')">Close</button>
+        <button class="btn btn-primary" onclick="logComplaintForCustomer()" data-testid="log-complaint-for-customer">
+          <i class="fas fa-plus"></i> Log Complaint
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Complaint Detail Modal -->
   <div class="modal-overlay" id="complaint-detail-modal" data-testid="complaint-detail-modal">
     <div class="modal" style="max-width: 700px;">
