@@ -1,10 +1,12 @@
 {
   "sheetsUrl": {
-    "all": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?output=csv"
+    "transactions": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=302195719&single=true&output=csv",
+    "customers": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=1161555937&single=true&output=csv",
+    "loans": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=317818925&single=true&output=csv"
   },
   "complaintCategories": [
     "Account Issues",
-    "Card Issues", 
+    "Card Issues",
     "Loan Issues",
     "Transfer Issues",
     "KYC/Documentation",
