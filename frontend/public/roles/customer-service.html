@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Service - PayMFB</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/customer-service.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">P</div>
+          <div>
+            <div class="logo-text">PayMFB</div>
+            <div class="logo-subtitle">Customer Service</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Dashboard</div>
+          <div class="nav-item active" data-section="overview">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Overview</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Complaints</div>
+          <div class="nav-item" data-section="complaints">
+            <i class="fas fa-headset"></i>
+            <span>All Complaints</span>
+          </div>
+          <div class="nav-item" data-section="my-complaints">
+            <i class="fas fa-user-clock"></i>
+            <span>My Assignments</span>
+          </div>
+          <div class="nav-item" data-section="new-complaint">
+            <i class="fas fa-plus-circle"></i>
+            <span>Log Complaint</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Customer</div>
+          <div class="nav-item" data-section="customer-lookup">
+            <i class="fas fa-search"></i>
+            <span>Customer Lookup</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar" data-testid="user-avatar">?</div>
+          <div class="user-details">
+            <div class="user-name" id="user-name" data-testid="user-name">Loading...</div>
+            <div class="user-role" id="user-role" data-testid="user-role">-</div>
+          </div>
+          <button class="logout-btn" id="logout-btn" data-testid="logout-btn" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div id="page-loader" class="loader" style="display: none;">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Overview Section -->
+      <section id="overview" class="dashboard-section">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" data-testid="page-title">Service Dashboard</h1>
+            <p class="page-subtitle">Complaint management and customer support</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" id="new-complaint-btn" data-testid="new-complaint-btn">
+              <i class="fas fa-plus"></i>
+              New Complaint
+            </button>
+          </div>
+        </div>
+
+        <!-- Service Stats -->
+        <div class="service-summary" id="service-summary" data-testid="service-summary">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Complaints Trend</h3>
+                <p class="card-subtitle">Last 14 days</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="complaintsTrendChart" data-testid="complaints-trend-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Category Distribution</h3>
+                <p class="card-subtitle">By complaint type</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="categoryDistributionChart" data-testid="category-distribution-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">SLA Performance</h3>
+                <p class="card-subtitle">Met vs Breached</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="slaPerformanceChart" data-testid="sla-performance-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Priority Distribution</h3>
+                <p class="card-subtitle">Active complaints by priority</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="priorityDistributionChart" data-testid="priority-distribution-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Complaints -->
+        <div class="data-section">
+          <div class="section-header">
+            <h3 class="section-title"><i class="fas fa-exclamation-circle"></i> Recent Complaints</h3>
+            <button class="btn btn-secondary btn-sm" onclick="navigateToSection('complaints')">
+              View All
+            </button>
+          </div>
+          <div class="section-content">
+            <div id="recent-complaints" data-testid="recent-complaints">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- All Complaints Section -->
+      <section id="complaints" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">All Complaints</h1>
+            <p class="page-subtitle">View and manage all customer complaints</p>
+          </div>
+          <div class="header-actions">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="complaint-search" class="form-input" placeholder="Search complaints..." data-testid="complaint-search">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs" id="status-filter" data-testid="status-filter">
+          <button class="filter-tab active" data-status="all">All <span class="count" id="count-all">0</span></button>
+          <button class="filter-tab" data-status="Open">Open <span class="count" id="count-open">0</span></button>
+          <button class="filter-tab" data-status="In Progress">In Progress <span class="count" id="count-progress">0</span></button>
+          <button class="filter-tab" data-status="Escalated">Escalated <span class="count" id="count-escalated">0</span></button>
+          <button class="filter-tab" data-status="Resolved">Resolved <span class="count" id="count-resolved">0</span></button>
+          <button class="filter-tab" data-status="Closed">Closed <span class="count" id="count-closed">0</span></button>
+        </div>
+
+        <!-- Complaints List -->
+        <div id="complaints-list" data-testid="complaints-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- My Complaints Section -->
+      <section id="my-complaints" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">My Assignments</h1>
+            <p class="page-subtitle">Complaints assigned to you</p>
+          </div>
+        </div>
+
+        <div id="my-complaints-list" data-testid="my-complaints-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- New Complaint Section -->
+      <section id="new-complaint" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Log New Complaint</h1>
+            <p class="page-subtitle">Register a new customer complaint</p>
+          </div>
+        </div>
+
+        <div class="quick-log-form" id="complaint-form-container" data-testid="complaint-form-container">
+          <form id="complaint-form" data-testid="complaint-form">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1rem;">Customer Information</h3>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Customer Account/Phone *</label>
+                <input type="text" id="customer-search-input" class="form-input" placeholder="Enter account number or phone" required data-testid="customer-search-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Customer Name *</label>
+                <input type="text" id="customer-name" class="form-input" placeholder="Customer full name" required data-testid="customer-name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" id="customer-phone" class="form-input" placeholder="08xxxxxxxxx" data-testid="customer-phone">
+              </div>
+            </div>
+
+            <div class="customer-search-result" id="customer-search-result" data-testid="customer-search-result">
+              <div class="customer-found">
+                <div class="customer-found-avatar" id="found-customer-avatar">?</div>
+                <div class="customer-found-info">
+                  <div class="customer-found-name" id="found-customer-name">-</div>
+                  <div class="customer-found-details" id="found-customer-details">-</div>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" id="use-customer-btn" data-testid="use-customer-btn">
+                  Use This Customer
+                </button>
+              </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1.5rem; font-size: 1rem;">Complaint Details</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Category *</label>
+                <select id="complaint-category" class="form-select" required data-testid="complaint-category">
+                  <option value="">Select category</option>
+                  <option value="Account Issues">Account Issues</option>
+                  <option value="Card Issues">Card Issues</option>
+                  <option value="Loan Issues">Loan Issues</option>
+                  <option value="Transfer Issues">Transfer Issues</option>
+                  <option value="KYC/Documentation">KYC/Documentation</option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Priority *</label>
+                <select id="complaint-priority" class="form-select" required data-testid="complaint-priority">
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Channel</label>
+                <select id="complaint-channel" class="form-select" data-testid="complaint-channel">
+                  <option value="Walk-in">Walk-in</option>
+                  <option value="Phone">Phone</option>
+                  <option value="Email">Email</option>
+                  <option value="Social Media">Social Media</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row full">
+              <div class="form-group">
+                <label class="form-label">Subject *</label>
+                <input type="text" id="complaint-subject" class="form-input" placeholder="Brief description of the issue" required data-testid="complaint-subject">
+              </div>
+            </div>
+
+            <div class="form-row full">
+              <div class="form-group">
+                <label class="form-label">Description *</label>
+                <textarea id="complaint-description" class="form-textarea" placeholder="Detailed description of the complaint..." required data-testid="complaint-description"></textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Related Transaction ID</label>
+                <input type="text" id="related-transaction" class="form-input" placeholder="If applicable" data-testid="related-transaction">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Assign To</label>
+                <select id="assign-to" class="form-select" data-testid="assign-to">
+                  <option value="">Unassigned</option>
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+              <button type="submit" class="btn btn-primary" data-testid="submit-complaint-btn">
+                <i class="fas fa-plus"></i>
+                Create Complaint
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="document.getElementById('complaint-form').reset()">
+                <i class="fas fa-times"></i>
+                Clear Form
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Customer Lookup Section -->
+      <section id="customer-lookup" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Customer Lookup</h1>
+            <p class="page-subtitle">Search and view customer information</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+          <div class="search-box" style="max-width: 400px;">
+            <i class="fas fa-search"></i>
+            <input type="text" id="customer-lookup-input" class="form-input" placeholder="Search by name, phone, or account number..." data-testid="customer-lookup-input">
+          </div>
+        </div>
+
+        <div id="customer-lookup-results" data-testid="customer-lookup-results">
+          <div class="empty-state">
+            <i class="fas fa-user-search"></i>
+            <p>Enter a search term to find customers</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Complaint Detail Modal -->
+  <div class="modal-overlay" id="complaint-detail-modal" data-testid="complaint-detail-modal">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Complaint Details</h2>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="complaint-detail-content" data-testid="complaint-detail-content">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer" id="complaint-detail-actions" data-testid="complaint-detail-actions">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Modal (Resolve/Escalate/Assign) -->
+  <div class="modal-overlay" id="action-modal" data-testid="action-modal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="action-modal-title">Action</h2>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="action-modal-content" data-testid="action-modal-content">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="App.hideModal('action-modal')">Cancel</button>
+        <button class="btn btn-primary" id="action-modal-submit" data-testid="action-modal-submit">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sheets-api.js"></script>
+  <script src="../js/complaints.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/customer-service-charts.js"></script>
+  <script>
+    let appData = null;
+    let currentComplaint = null;
+    let currentFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const initialized = await App.initDashboard(['CustomerService', 'CEO', 'COO']);
+      if (!initialized) return;
+
+      CustomerServiceCharts.init();
+
+      appData = await App.loadData();
+      
+      renderDashboard();
+      setupNavigation();
+      setupEventListeners();
+      populateStaffDropdown();
+      App.setupModals();
+    });
+
+    function setupNavigation() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const section = this.dataset.section;
+          navigateToSection(section);
+        });
+      });
+    }
+
+    function navigateToSection(section) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
+
+      document.querySelectorAll('.dashboard-section').forEach(s => {
+        s.style.display = s.id === section ? 'block' : 'none';
+      });
+
+      if (section === 'complaints') {
+        renderComplaintsList(currentFilter);
+      } else if (section === 'my-complaints') {
+        renderMyComplaints();
+      }
+    }
+
+    function setupEventListeners() {
+      // New complaint button
+      document.getElementById('new-complaint-btn').addEventListener('click', () => {
+        navigateToSection('new-complaint');
+      });
+
+      // Complaint form submission
+      document.getElementById('complaint-form').addEventListener('submit', handleCreateComplaint);
+
+      // Status filter tabs
+      document.querySelectorAll('#status-filter .filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('#status-filter .filter-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.status;
+          renderComplaintsList(currentFilter);
+        });
+      });
+
+      // Complaint search
+      document.getElementById('complaint-search').addEventListener('input', Utils.debounce((e) => {
+        const query = e.target.value;
+        if (query.length >= 2) {
+          const results = Complaints.search(query);
+          renderComplaintsCards(results, 'complaints-list');
+        } else {
+          renderComplaintsList(currentFilter);
+        }
+      }, 300));
+
+      // Customer search in form
+      document.getElementById('customer-search-input').addEventListener('input', Utils.debounce(handleCustomerSearch, 300));
+
+      // Customer lookup
+      document.getElementById('customer-lookup-input').addEventListener('input', Utils.debounce(handleCustomerLookup, 300));
+
+      // Use customer button
+      document.getElementById('use-customer-btn').addEventListener('click', handleUseCustomer);
+    }
+
+    function populateStaffDropdown() {
+      const staff = Auth.getCustomerServiceStaff();
+      const select = document.getElementById('assign-to');
+      
+      staff.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.textContent = s.name;
+        select.appendChild(option);
+      });
+    }
+
+    function renderDashboard() {
+      const analytics = Complaints.getAnalytics();
+      
+      renderServiceStats(analytics);
+      CustomerServiceCharts.updateCharts(analytics);
+      renderRecentComplaints();
+      updateFilterCounts(analytics);
+    }
+
+    function renderServiceStats(analytics) {
+      const stats = [
+        { icon: 'inbox', value: analytics.total, label: 'Total', color: '#0ea5e9', bgColor: 'rgba(14, 165, 233, 0.15)' },
+        { icon: 'folder-open', value: analytics.open, label: 'Open', color: '#00d4aa', bgColor: 'rgba(0, 212, 170, 0.15)' },
+        { icon: 'spinner', value: analytics.inProgress, label: 'In Progress', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.15)' },
+        { icon: 'arrow-up', value: analytics.escalated, label: 'Escalated', color: '#a855f7', bgColor: 'rgba(168, 85, 247, 0.15)' },
+        { icon: 'check-circle', value: analytics.resolved + analytics.closed, label: 'Resolved', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.15)' }
+      ];
+
+      document.getElementById('service-summary').innerHTML = stats.map(stat => `
+        <div class="service-stat" onclick="filterByStatus('${stat.label}')">
+          <div class="service-stat-icon" style="background: ${stat.bgColor}; color: ${stat.color}">
+            <i class="fas fa-${stat.icon}"></i>
+          </div>
+          <div class="service-stat-value">${stat.value}</div>
+          <div class="service-stat-label">${stat.label}</div>
+        </div>
+      `).join('');
+    }
+
+    function updateFilterCounts(analytics) {
+      document.getElementById('count-all').textContent = analytics.total;
+      document.getElementById('count-open').textContent = analytics.open;
+      document.getElementById('count-progress').textContent = analytics.inProgress;
+      document.getElementById('count-escalated').textContent = analytics.escalated;
+      document.getElementById('count-resolved').textContent = analytics.resolved;
+      document.getElementById('count-closed').textContent = analytics.closed;
+    }
+
+    function renderRecentComplaints() {
+      const complaints = Complaints.getAll().slice(0, 5);
+      renderComplaintsCards(complaints, 'recent-complaints');
+    }
+
+    function renderComplaintsList(status = 'all') {
+      let complaints = status === 'all' 
+        ? Complaints.getAll() 
+        : Complaints.getByStatus(status);
+      
+      renderComplaintsCards(complaints, 'complaints-list');
+    }
+
+    function renderMyComplaints() {
+      const user = Auth.getCurrentUser();
+      const complaints = Complaints.getByAssignee(user.id);
+      renderComplaintsCards(complaints, 'my-complaints-list');
+    }
+
+    function renderComplaintsCards(complaints, containerId) {
+      const container = document.getElementById(containerId);
+      
+      if (!complaints || complaints.length === 0) {
+        container.innerHTML = `
+          <div class="complaints-empty">
+            <i class="fas fa-inbox complaints-empty-icon"></i>
+            <div class="complaints-empty-title">No complaints found</div>
+            <div class="complaints-empty-text">There are no complaints matching your criteria</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = complaints.map(c => {
+        const slaStatus = Complaints.getSLAStatus(c);
+        const slaClass = slaStatus.toLowerCase().replace(' ', '-');
+        
+        return `
+          <div class="complaint-card priority-${c.priority.toLowerCase()}" onclick="showComplaintDetail('${c.id}')" data-testid="complaint-card-${c.id}">
+            <div class="complaint-header">
+              <span class="complaint-ticket">${c.ticketNumber}</span>
+              <span class="complaint-time">${Utils.formatRelativeTime(c.createdAt)}</span>
+            </div>
+            <div class="complaint-customer">${c.customerName || 'Unknown Customer'}</div>
+            <div class="complaint-category">${c.category} • ${c.subject || 'No subject'}</div>
+            <div class="complaint-description">${c.description || 'No description'}</div>
+            <div class="complaint-footer">
+              <div class="complaint-assignee">
+                ${c.assignedToName ? `
+                  <div class="complaint-assignee-avatar">${Utils.getInitials(c.assignedToName)}</div>
+                  <span>${c.assignedToName}</span>
+                ` : '<span style="color: var(--text-muted)">Unassigned</span>'}
+              </div>
+              <div class="complaint-sla ${slaClass}">
+                <span class="sla-dot"></span>
+                <span>${slaStatus}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showComplaintDetail(id) {
+      currentComplaint = Complaints.getById(id);
+      if (!currentComplaint) return;
+
+      const slaStatus = Complaints.getSLAStatus(currentComplaint);
+      const slaRemaining = Utils.getSLARemaining(currentComplaint.createdAt, 
+        Complaints.config?.slaHours[currentComplaint.priority] || 48);
+
+      document.getElementById('complaint-detail-content').innerHTML = `
+        <div class="complaint-detail-header">
+          <div class="complaint-detail-info">
+            <div class="complaint-detail-ticket">${currentComplaint.ticketNumber}</div>
+            <div class="complaint-detail-badges">
+              ${App.formatters.status(currentComplaint.status)}
+              ${App.formatters.priority(currentComplaint.priority)}
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Customer Information</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Name</span>
+              <span class="detail-value">${currentComplaint.customerName || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Phone</span>
+              <span class="detail-value">${currentComplaint.customerPhone || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Account Number</span>
+              <span class="detail-value">${currentComplaint.customerAccountNumber || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Channel</span>
+              <span class="detail-value">${currentComplaint.channel || 'Walk-in'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Complaint Details</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Category</span>
+              <span class="detail-value">${currentComplaint.category}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Created</span>
+              <span class="detail-value">${Utils.formatDate(currentComplaint.createdAt, 'datetime')}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">SLA Status</span>
+              <span class="detail-value" style="color: ${slaStatus === 'Breached' ? 'var(--accent-danger)' : slaStatus === 'Warning' || slaStatus === 'Critical' ? 'var(--accent-warning)' : 'var(--accent-primary)'}">${slaStatus}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">SLA Time</span>
+              <span class="detail-value">${slaRemaining}</span>
+            </div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <span class="detail-label">Subject</span>
+            <div class="detail-value" style="margin-top: 0.25rem;">${currentComplaint.subject || '-'}</div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <span class="detail-label">Description</span>
+            <div class="detail-description" style="margin-top: 0.5rem;">${currentComplaint.description || '-'}</div>
+          </div>
+          ${currentComplaint.relatedTransaction ? `
+            <div style="margin-top: 1rem;">
+              <span class="detail-label">Related Transaction</span>
+              <div class="detail-value" style="margin-top: 0.25rem;">${currentComplaint.relatedTransaction}</div>
+            </div>
+          ` : ''}
+        </div>
+
+        ${currentComplaint.resolution ? `
+          <div class="detail-section">
+            <div class="detail-section-title">Resolution</div>
+            <div class="detail-description">${currentComplaint.resolution}</div>
+          </div>
+        ` : ''}
+
+        <div class="detail-section">
+          <div class="detail-section-title">History</div>
+          <div class="history-timeline">
+            ${currentComplaint.history.map(h => `
+              <div class="history-item ${h.action.toLowerCase().replace(' ', '-')}">
+                <div class="history-action">${h.action}</div>
+                <div class="history-details">${h.details}</div>
+                <div class="history-meta">${h.user} • ${Utils.formatDate(h.timestamp, 'datetime')}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      // Render action buttons based on status
+      const actions = getAvailableActions(currentComplaint);
+      document.getElementById('complaint-detail-actions').innerHTML = `
+        <div class="action-buttons">
+          ${actions.map(a => `
+            <button class="action-btn ${a.class || ''}" onclick="${a.onclick}" data-testid="${a.testId}">
+              <i class="fas fa-${a.icon}"></i>
+              ${a.label}
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      App.showModal('complaint-detail-modal');
+    }
+
+    function getAvailableActions(complaint) {
+      const actions = [];
+
+      if (complaint.status === 'Open') {
+        actions.push({ icon: 'user-check', label: 'Assign', onclick: 'showAssignModal()', testId: 'assign-btn' });
+        actions.push({ icon: 'play', label: 'Start Working', onclick: 'startWorking()', testId: 'start-btn' });
+      }
+
+      if (complaint.status === 'In Progress') {
+        actions.push({ icon: 'check', label: 'Resolve', onclick: 'showResolveModal()', class: 'primary', testId: 'resolve-btn' });
+        actions.push({ icon: 'arrow-up', label: 'Escalate', onclick: 'showEscalateModal()', class: 'danger', testId: 'escalate-btn' });
+        actions.push({ icon: 'sticky-note', label: 'Add Note', onclick: 'showAddNoteModal()', testId: 'note-btn' });
+      }
+
+      if (complaint.status === 'Escalated') {
+        actions.push({ icon: 'check', label: 'Resolve', onclick: 'showResolveModal()', class: 'primary', testId: 'resolve-btn' });
+        actions.push({ icon: 'sticky-note', label: 'Add Note', onclick: 'showAddNoteModal()', testId: 'note-btn' });
+      }
+
+      if (complaint.status === 'Resolved') {
+        actions.push({ icon: 'check-double', label: 'Close', onclick: 'closeComplaint()', class: 'primary', testId: 'close-btn' });
+        actions.push({ icon: 'redo', label: 'Reopen', onclick: 'showReopenModal()', testId: 'reopen-btn' });
+      }
+
+      if (complaint.status === 'Closed') {
+        actions.push({ icon: 'redo', label: 'Reopen', onclick: 'showReopenModal()', testId: 'reopen-btn' });
+      }
+
+      return actions;
+    }
+
+    function handleCreateComplaint(e) {
+      e.preventDefault();
+
+      const formData = {
+        customerName: document.getElementById('customer-name').value,
+        customerPhone: document.getElementById('customer-phone').value,
+        customerAccountNumber: document.getElementById('customer-search-input').value,
+        category: document.getElementById('complaint-category').value,
+        priority: document.getElementById('complaint-priority').value,
+        channel: document.getElementById('complaint-channel').value,
+        subject: document.getElementById('complaint-subject').value,
+        description: document.getElementById('complaint-description').value,
+        relatedTransaction: document.getElementById('related-transaction').value
+      };
+
+      const assignTo = document.getElementById('assign-to').value;
+      
+      const complaint = Complaints.create(formData);
+
+      if (assignTo) {
+        const staff = Auth.getCustomerServiceStaff().find(s => s.id === assignTo);
+        if (staff) {
+          Complaints.assign(complaint.id, staff.id, staff.name);
+        }
+      }
+
+      Utils.showToast(`Complaint ${complaint.ticketNumber} created successfully`, 'success');
+      document.getElementById('complaint-form').reset();
+      document.getElementById('customer-search-result').classList.remove('show');
+      
+      renderDashboard();
+      navigateToSection('complaints');
+    }
+
+    async function handleCustomerSearch(e) {
+      const query = e.target.value;
+      if (query.length < 3 || !appData) return;
+
+      const customers = appData.customers.filter(c => 
+        c.phone_number?.includes(query) ||
+        c.account_number?.includes(query) ||
+        c.customer_id?.includes(query)
+      );
+
+      if (customers.length > 0) {
+        const customer = customers[0];
+        document.getElementById('found-customer-avatar').textContent = 
+          Utils.getInitials(`${customer.first_name} ${customer.last_name}`);
+        document.getElementById('found-customer-name').textContent = 
+          `${customer.first_name} ${customer.last_name}`;
+        document.getElementById('found-customer-details').textContent = 
+          `${customer.phone_number || '-'} • ${customer.account_number || '-'}`;
+        document.getElementById('customer-search-result').classList.add('show');
+        document.getElementById('customer-search-result').dataset.customer = JSON.stringify(customer);
+      } else {
+        document.getElementById('customer-search-result').classList.remove('show');
+      }
+    }
+
+    function handleUseCustomer() {
+      const customerData = document.getElementById('customer-search-result').dataset.customer;
+      if (!customerData) return;
+
+      const customer = JSON.parse(customerData);
+      document.getElementById('customer-name').value = `${customer.first_name} ${customer.last_name}`;
+      document.getElementById('customer-phone').value = customer.phone_number || '';
+      document.getElementById('customer-search-input').value = customer.account_number || customer.customer_id;
+      document.getElementById('customer-search-result').classList.remove('show');
+    }
+
+    async function handleCustomerLookup(e) {
+      const query = e.target.value.toLowerCase();
+      if (query.length < 2 || !appData) {
+        document.getElementById('customer-lookup-results').innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-user-search"></i>
+            <p>Enter a search term to find customers</p>
+          </div>
+        `;
+        return;
+      }
+
+      const results = appData.customers.filter(c => 
+        c.first_name?.toLowerCase().includes(query) ||
+        c.last_name?.toLowerCase().includes(query) ||
+        c.phone_number?.includes(query) ||
+        c.account_number?.includes(query) ||
+        c.email?.toLowerCase().includes(query)
+      ).slice(0, 10);
+
+      if (results.length === 0) {
+        document.getElementById('customer-lookup-results').innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-user-slash"></i>
+            <p>No customers found matching "${query}"</p>
+          </div>
+        `;
+        return;
+      }
+
+      document.getElementById('customer-lookup-results').innerHTML = results.map(c => `
+        <div class="card" style="margin-bottom: 1rem; cursor: pointer;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="user-avatar" style="background: var(--accent-secondary);">${Utils.getInitials(`${c.first_name} ${c.last_name}`)}</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 500; color: var(--text-primary);">${c.first_name} ${c.last_name}</div>
+              <div style="font-size: 0.8125rem; color: var(--text-muted);">
+                ${c.phone_number || '-'} • ${c.account_number || c.customer_id}
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div class="badge ${c.kyc_status === 'Verified' ? 'badge-success' : 'badge-warning'}">${c.kyc_status || 'Pending'}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${c.customer_type || '-'}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Action modal handlers
+    function showAssignModal() {
+      App.hideModal('complaint-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Assign Complaint';
+      
+      const staff = Auth.getCustomerServiceStaff();
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Assign To</label>
+          <select id="assign-staff" class="form-select" data-testid="assign-staff-select">
+            ${staff.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+          </select>
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const staffId = document.getElementById('assign-staff').value;
+        const staffName = staff.find(s => s.id === staffId)?.name;
+        Complaints.assign(currentComplaint.id, staffId, staffName);
+        Utils.showToast('Complaint assigned successfully', 'success');
+        App.hideModal('action-modal');
+        renderDashboard();
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function startWorking() {
+      const user = Auth.getCurrentUser();
+      Complaints.assign(currentComplaint.id, user.id, user.name);
+      Complaints.update(currentComplaint.id, { status: 'In Progress' });
+      Utils.showToast('You are now working on this complaint', 'success');
+      App.hideModal('complaint-detail-modal');
+      renderDashboard();
+    }
+
+    function showResolveModal() {
+      App.hideModal('complaint-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Resolve Complaint';
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Resolution *</label>
+          <textarea id="resolution-text" class="form-textarea" placeholder="Describe how the issue was resolved..." required data-testid="resolution-textarea"></textarea>
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const resolution = document.getElementById('resolution-text').value;
+        if (!resolution) {
+          Utils.showToast('Please enter a resolution', 'error');
+          return;
+        }
+        Complaints.resolve(currentComplaint.id, resolution);
+        Utils.showToast('Complaint resolved successfully', 'success');
+        App.hideModal('action-modal');
+        renderDashboard();
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function showEscalateModal() {
+      App.hideModal('complaint-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Escalate Complaint';
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Escalate To *</label>
+          <select id="escalate-to" class="form-select" data-testid="escalate-to-select">
+            <option value="Team Lead">Team Lead</option>
+            <option value="Manager">Manager</option>
+            <option value="Operations">Operations</option>
+            <option value="Compliance">Compliance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason for Escalation *</label>
+          <textarea id="escalation-reason" class="form-textarea" placeholder="Why is this being escalated?" required data-testid="escalation-reason"></textarea>
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const escalateTo = document.getElementById('escalate-to').value;
+        const reason = document.getElementById('escalation-reason').value;
+        if (!reason) {
+          Utils.showToast('Please enter a reason', 'error');
+          return;
+        }
+        Complaints.escalate(currentComplaint.id, escalateTo, reason);
+        Utils.showToast('Complaint escalated successfully', 'success');
+        App.hideModal('action-modal');
+        renderDashboard();
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function showAddNoteModal() {
+      App.hideModal('complaint-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Add Note';
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Note</label>
+          <textarea id="note-text" class="form-textarea" placeholder="Add a note or update..." data-testid="note-textarea"></textarea>
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const note = document.getElementById('note-text').value;
+        if (!note) {
+          Utils.showToast('Please enter a note', 'error');
+          return;
+        }
+        Complaints.addNote(currentComplaint.id, note);
+        Utils.showToast('Note added successfully', 'success');
+        App.hideModal('action-modal');
+        renderDashboard();
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function showReopenModal() {
+      App.hideModal('complaint-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Reopen Complaint';
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Reason for Reopening *</label>
+          <textarea id="reopen-reason" class="form-textarea" placeholder="Why is this being reopened?" required data-testid="reopen-reason"></textarea>
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const reason = document.getElementById('reopen-reason').value;
+        if (!reason) {
+          Utils.showToast('Please enter a reason', 'error');
+          return;
+        }
+        Complaints.reopen(currentComplaint.id, reason);
+        Utils.showToast('Complaint reopened', 'success');
+        App.hideModal('action-modal');
+        renderDashboard();
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function closeComplaint() {
+      Complaints.close(currentComplaint.id);
+      Utils.showToast('Complaint closed', 'success');
+      App.hideModal('complaint-detail-modal');
+      renderDashboard();
+    }
+
+    function filterByStatus(label) {
+      const statusMap = {
+        'Total': 'all',
+        'Open': 'Open',
+        'In Progress': 'In Progress',
+        'Escalated': 'Escalated',
+        'Resolved': 'Resolved'
+      };
+      currentFilter = statusMap[label] || 'all';
+      navigateToSection('complaints');
+    }
+  </script>
+</body>
+</html>
