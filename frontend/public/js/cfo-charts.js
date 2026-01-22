@@ -11,6 +11,7 @@ const CFOCharts = {
     this.initNPLTrendChart();
     this.initIncomeDistributionChart();
     this.initLoanProductChart();
+    this.initRouteCharts();
   },
 
   // Revenue/Transaction Value Trend
