@@ -13,7 +13,13 @@ const SheetsAPI = {
   // Initialize with config
   async init() {
     try {
-      const response = await fetch('./data/config.json');
+      let response;
+      try {
+        response = await fetch('./data/config.json');
+        if (!response.ok) throw new Error('Not found');
+      } catch {
+        response = await fetch('../data/config.json');
+      }
       this.config = await response.json();
       return true;
     } catch (error) {
