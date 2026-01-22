@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Recovery Dashboard - PayMFB</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/customer-service.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">P</div>
+          <div>
+            <div class="logo-text">PayMFB</div>
+            <div class="logo-subtitle">Loan Recovery</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Dashboard</div>
+          <div class="nav-item active" data-section="overview">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Overview</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Loan Management</div>
+          <div class="nav-item" data-section="overdue">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Overdue Loans</span>
+          </div>
+          <div class="nav-item" data-section="npl">
+            <i class="fas fa-ban"></i>
+            <span>NPL Cases</span>
+          </div>
+          <div class="nav-item" data-section="escalations">
+            <i class="fas fa-arrow-up"></i>
+            <span>Loan Escalations</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Analytics</div>
+          <div class="nav-item" data-section="performance">
+            <i class="fas fa-chart-bar"></i>
+            <span>Recovery Metrics</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar" data-testid="user-avatar">?</div>
+          <div class="user-details">
+            <div class="user-name" id="user-name" data-testid="user-name">Loading...</div>
+            <div class="user-role" id="user-role" data-testid="user-role">-</div>
+          </div>
+          <button class="logout-btn" id="logout-btn" data-testid="logout-btn" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div id="page-loader" class="loader" style="display: none;">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Overview Section -->
+      <section id="overview" class="dashboard-section">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" data-testid="page-title">Loan Recovery Dashboard</h1>
+            <p class="page-subtitle">Overdue loans, NPL management, and recovery tracking</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" id="refresh-btn" data-testid="refresh-btn">
+              <i class="fas fa-sync-alt"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="service-summary" id="recovery-summary" data-testid="recovery-summary">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Alert Banner for Critical Cases -->
+        <div id="alerts-container" data-testid="alerts-container"></div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Overdue Aging</h3>
+                <p class="card-subtitle">By days overdue</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="overdueAgingChart" data-testid="overdue-aging-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Loan Status Distribution</h3>
+                <p class="card-subtitle">Portfolio health</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="statusDistributionChart" data-testid="status-distribution-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Recovery Trend</h3>
+                <p class="card-subtitle">Collections over time</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="recoveryTrendChart" data-testid="recovery-trend-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">NPL by Product</h3>
+                <p class="card-subtitle">Non-performing loans breakdown</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="nplByProductChart" data-testid="npl-by-product-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Overdue Loans -->
+        <div class="data-section">
+          <div class="section-header">
+            <h3 class="section-title"><i class="fas fa-exclamation-circle"></i> Critical Overdue Loans</h3>
+            <button class="btn btn-secondary btn-sm" onclick="navigateToSection('overdue')">
+              View All
+            </button>
+          </div>
+          <div class="section-content">
+            <div id="critical-loans" data-testid="critical-loans">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Overdue Loans Section -->
+      <section id="overdue" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Overdue Loans</h1>
+            <p class="page-subtitle">All loans with missed payments</p>
+          </div>
+          <div class="header-actions">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="overdue-search" class="form-input" placeholder="Search by loan ID or customer..." data-testid="overdue-search">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="dashboard-filters">
+          <div class="filter-group">
+            <label class="filter-label">Aging</label>
+            <select id="aging-filter" class="form-select filter-input" data-testid="aging-filter">
+              <option value="">All</option>
+              <option value="30">1-30 Days</option>
+              <option value="60">31-60 Days</option>
+              <option value="90">61-90 Days</option>
+              <option value="90+">90+ Days</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Product</label>
+            <select id="product-filter" class="form-select filter-input" data-testid="product-filter">
+              <option value="">All Products</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Amount Range</label>
+            <select id="amount-filter" class="form-select filter-input" data-testid="amount-filter">
+              <option value="">All</option>
+              <option value="small">< ₦100,000</option>
+              <option value="medium">₦100K - ₦500K</option>
+              <option value="large">> ₦500,000</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary filter-btn" onclick="applyOverdueFilters()" data-testid="apply-overdue-filters">
+              <i class="fas fa-filter"></i> Apply
+            </button>
+            <button class="btn btn-secondary filter-btn" onclick="clearOverdueFilters()" data-testid="clear-overdue-filters">
+              <i class="fas fa-times"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <div id="overdue-list" data-testid="overdue-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- NPL Cases Section -->
+      <section id="npl" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Non-Performing Loans</h1>
+            <p class="page-subtitle">Defaulted and delinquent cases</p>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="npl-stats" data-testid="npl-stats">
+          <!-- Populated by JS -->
+        </div>
+
+        <div id="npl-list" data-testid="npl-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Loan Escalations Section -->
+      <section id="escalations" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Loan-Related Escalations</h1>
+            <p class="page-subtitle">Complaints escalated to loan recovery team</p>
+          </div>
+        </div>
+
+        <div id="loan-escalations-list" data-testid="loan-escalations-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Performance Section -->
+      <section id="performance" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Recovery Metrics</h1>
+            <p class="page-subtitle">Collection and recovery performance</p>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="performance-stats" data-testid="performance-stats">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="insights-grid" id="insights-grid" data-testid="insights-grid">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Loan Detail Modal -->
+  <div class="modal-overlay" id="loan-detail-modal" data-testid="loan-detail-modal">
+    <div class="modal" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Loan Details</h2>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="loan-detail-content" data-testid="loan-detail-content">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="App.hideModal('loan-detail-modal')">Close</button>
+        <button class="btn btn-primary" onclick="initiateRecoveryAction()" data-testid="initiate-recovery-btn">
+          <i class="fas fa-phone"></i> Log Recovery Action
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Modal -->
+  <div class="modal-overlay" id="action-modal" data-testid="action-modal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="action-modal-title">Recovery Action</h2>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="action-modal-content" data-testid="action-modal-content">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="App.hideModal('action-modal')">Cancel</button>
+        <button class="btn btn-primary" id="action-modal-submit" data-testid="action-modal-submit">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sheets-api.js"></script>
+  <script src="../js/complaints.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let appData = null;
+    let currentLoan = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const initialized = await App.initDashboard(['LoanRecovery', 'CEO', 'COO', 'CFO']);
+      if (!initialized) return;
+
+      await Complaints.init();
+      appData = await App.loadData();
+      
+      if (appData) {
+        renderDashboard();
+        populateProductFilter();
+      }
+      
+      setupNavigation();
+      setupEventListeners();
+      App.setupModals();
+    });
+
+    function setupNavigation() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const section = this.dataset.section;
+          navigateToSection(section);
+        });
+      });
+    }
+
+    function navigateToSection(section) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
+
+      document.querySelectorAll('.dashboard-section').forEach(s => {
+        s.style.display = s.id === section ? 'block' : 'none';
+      });
+
+      if (section === 'overdue') {
+        renderOverdueLoans();
+      } else if (section === 'npl') {
+        renderNPLSection();
+      } else if (section === 'escalations') {
+        renderLoanEscalations();
+      } else if (section === 'performance') {
+        renderPerformanceSection();
+      }
+    }
+
+    function setupEventListeners() {
+      document.getElementById('refresh-btn').addEventListener('click', async () => {
+        appData = await App.loadData();
+        if (appData) renderDashboard();
+        Utils.showToast('Data refreshed', 'success');
+      });
+
+      document.getElementById('overdue-search').addEventListener('input', Utils.debounce((e) => {
+        renderOverdueLoans(e.target.value);
+      }, 300));
+    }
+
+    function getOverdueLoans() {
+      if (!appData) return [];
+      const now = new Date();
+      return appData.loans.filter(l => {
+        if (l.loan_status === 'Closed' || l.loan_status === 'Paid') return false;
+        if (l.next_payment_due_date && new Date(l.next_payment_due_date) < now) return true;
+        if (l.loan_status === 'Overdue' || l.loan_status === 'Default' || l.loan_status === 'Delinquent') return true;
+        return false;
+      });
+    }
+
+    function getNPLLoans() {
+      if (!appData) return [];
+      return appData.loans.filter(l => 
+        l.loan_status === 'Default' || 
+        l.loan_status === 'Delinquent' || 
+        l.loan_status === 'Written Off'
+      );
+    }
+
+    function getLoanEscalations() {
+      return Complaints.getAll().filter(c => 
+        c.category === 'Loan Issues' ||
+        c.escalatedTo === 'Loan Recovery Team' ||
+        c.escalatedTo === 'loan-recovery'
+      );
+    }
+
+    function renderDashboard() {
+      const overdueLoans = getOverdueLoans();
+      const nplLoans = getNPLLoans();
+      const loanAnalytics = SheetsAPI.getLoanAnalytics(appData.loans);
+
+      renderSummaryStats(overdueLoans, nplLoans, loanAnalytics);
+      renderAlerts(overdueLoans, nplLoans, loanAnalytics);
+      renderCharts(overdueLoans, nplLoans, loanAnalytics);
+      renderCriticalLoans(overdueLoans.slice(0, 5));
+    }
+
+    function renderSummaryStats(overdueLoans, nplLoans, analytics) {
+      const totalOverdue = Utils.sumBy(overdueLoans, 'total_outstanding_balance');
+      const totalNPL = Utils.sumBy(nplLoans, 'total_outstanding_balance');
+
+      const stats = [
+        { icon: 'exclamation-triangle', value: overdueLoans.length, label: 'Overdue Loans', color: '#d97706', bgColor: 'rgba(217, 119, 6, 0.15)' },
+        { icon: 'money-bill', value: Utils.formatCurrency(totalOverdue).replace('NGN', '₦'), label: 'Overdue Amount', color: '#d97706', bgColor: 'rgba(217, 119, 6, 0.15)' },
+        { icon: 'ban', value: nplLoans.length, label: 'NPL Cases', color: '#dc2626', bgColor: 'rgba(220, 38, 38, 0.15)' },
+        { icon: 'percentage', value: Utils.formatPercent(analytics.nplRatio), label: 'NPL Ratio', color: analytics.nplRatio > 5 ? '#dc2626' : '#059669', bgColor: analytics.nplRatio > 5 ? 'rgba(220, 38, 38, 0.15)' : 'rgba(5, 150, 105, 0.15)' },
+        { icon: 'chart-line', value: Utils.formatPercent(analytics.collectionRate), label: 'Collection Rate', color: '#059669', bgColor: 'rgba(5, 150, 105, 0.15)' }
+      ];
+
+      document.getElementById('recovery-summary').innerHTML = stats.map(stat => `
+        <div class="service-stat">
+          <div class="service-stat-icon" style="background: ${stat.bgColor}; color: ${stat.color}">
+            <i class="fas fa-${stat.icon}"></i>
+          </div>
+          <div class="service-stat-value">${stat.value}</div>
+          <div class="service-stat-label">${stat.label}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderAlerts(overdueLoans, nplLoans, analytics) {
+      const alerts = [];
+      
+      if (analytics.nplRatio > 5) {
+        alerts.push({
+          type: 'danger',
+          icon: 'exclamation-triangle',
+          title: 'High NPL Ratio Alert',
+          text: `NPL ratio is at ${Utils.formatPercent(analytics.nplRatio)}, which exceeds the 5% threshold. Immediate attention required.`
+        });
+      }
+
+      const criticalOverdue = overdueLoans.filter(l => {
+        const daysOverdue = getDaysOverdue(l);
+        return daysOverdue > 90;
+      });
+
+      if (criticalOverdue.length > 0) {
+        alerts.push({
+          type: 'warning',
+          icon: 'clock',
+          title: 'Critical Overdue Cases',
+          text: `${criticalOverdue.length} loans are over 90 days overdue. Total outstanding: ${Utils.formatCurrency(Utils.sumBy(criticalOverdue, 'total_outstanding_balance'))}`
+        });
+      }
+
+      document.getElementById('alerts-container').innerHTML = alerts.map(alert => `
+        <div class="alert-banner ${alert.type}">
+          <div class="alert-icon">
+            <i class="fas fa-${alert.icon}"></i>
+          </div>
+          <div class="alert-content">
+            <div class="alert-title">${alert.title}</div>
+            <div class="alert-text">${alert.text}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getDaysOverdue(loan) {
+      if (!loan.next_payment_due_date) return 0;
+      const dueDate = new Date(loan.next_payment_due_date);
+      const now = new Date();
+      const diff = now - dueDate;
+      return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+    }
+
+    let agingChart = null, statusChart = null, trendChart = null, nplProductChart = null;
+
+    function renderCharts(overdueLoans, nplLoans, analytics) {
+      // Aging Chart
+      const agingBuckets = { '1-30': 0, '31-60': 0, '61-90': 0, '90+': 0 };
+      overdueLoans.forEach(l => {
+        const days = getDaysOverdue(l);
+        if (days <= 30) agingBuckets['1-30']++;
+        else if (days <= 60) agingBuckets['31-60']++;
+        else if (days <= 90) agingBuckets['61-90']++;
+        else agingBuckets['90+']++;
+      });
+
+      const agingCtx = document.getElementById('overdueAgingChart').getContext('2d');
+      if (agingChart) agingChart.destroy();
+      agingChart = new Chart(agingCtx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(agingBuckets),
+          datasets: [{
+            label: 'Loans',
+            data: Object.values(agingBuckets),
+            backgroundColor: ['#059669', '#d97706', '#ea580c', '#dc2626'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      // Status Distribution Chart
+      const statusCtx = document.getElementById('statusDistributionChart').getContext('2d');
+      if (statusChart) statusChart.destroy();
+      statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(analytics.byStatus),
+          datasets: [{
+            data: Object.values(analytics.byStatus),
+            backgroundColor: ['#059669', '#0284c7', '#d97706', '#dc2626', '#7c3aed', '#64748b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+
+      // Recovery Trend
+      const trendCtx = document.getElementById('recoveryTrendChart').getContext('2d');
+      const months = analytics.monthlyDisbursements.slice(-6);
+      if (trendChart) trendChart.destroy();
+      trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: months.map(m => m.month),
+          datasets: [{
+            label: 'Collections',
+            data: months.map(m => m.amount * 0.3), // Simulated collection data
+            borderColor: '#059669',
+            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      // NPL by Product
+      const nplByProduct = {};
+      nplLoans.forEach(l => {
+        nplByProduct[l.loan_product] = (nplByProduct[l.loan_product] || 0) + 1;
+      });
+
+      const nplCtx = document.getElementById('nplByProductChart').getContext('2d');
+      if (nplProductChart) nplProductChart.destroy();
+      nplProductChart = new Chart(nplCtx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(nplByProduct),
+          datasets: [{
+            label: 'NPL Count',
+            data: Object.values(nplByProduct),
+            backgroundColor: '#dc2626',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function renderCriticalLoans(loans) {
+      const container = document.getElementById('critical-loans');
+      if (!loans.length) {
+        container.innerHTML = `
+          <div class="complaints-empty">
+            <i class="fas fa-check-circle complaints-empty-icon" style="color: var(--accent-primary);"></i>
+            <div class="complaints-empty-title">No critical overdue loans</div>
+            <div class="complaints-empty-text">All loans are in good standing</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = loans.map(l => {
+        const daysOverdue = getDaysOverdue(l);
+        const priorityClass = daysOverdue > 90 ? 'critical' : daysOverdue > 60 ? 'high' : daysOverdue > 30 ? 'medium' : 'low';
+        
+        return `
+          <div class="complaint-card priority-${priorityClass}" onclick="showLoanDetail('${l.loan_id}')" data-testid="loan-card-${l.loan_id}">
+            <div class="complaint-header">
+              <span class="complaint-ticket">${l.loan_id}</span>
+              <span class="complaint-time">${daysOverdue} days overdue</span>
+            </div>
+            <div class="complaint-customer">${l.customer_id}</div>
+            <div class="complaint-category">${l.loan_product} • ${l.loan_status}</div>
+            <div class="complaint-description">
+              Outstanding: ${Utils.formatCurrency(l.total_outstanding_balance)} | 
+              Monthly: ${Utils.formatCurrency(l.monthly_payment)}
+            </div>
+            <div class="complaint-footer">
+              <div class="complaint-assignee">
+                <span style="color: var(--text-muted)">${l.installments_paid}/${l.installments_agreed} paid</span>
+              </div>
+              <div class="badge ${priorityClass === 'critical' ? 'badge-danger' : priorityClass === 'high' ? 'badge-warning' : 'badge-info'}">
+                ${priorityClass.toUpperCase()}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderOverdueLoans(searchQuery = '') {
+      let loans = getOverdueLoans();
+      
+      // Apply search
+      if (searchQuery) {
+        loans = loans.filter(l => 
+          l.loan_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.customer_id?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      // Apply filters
+      const agingFilter = document.getElementById('aging-filter')?.value;
+      const productFilter = document.getElementById('product-filter')?.value;
+      const amountFilter = document.getElementById('amount-filter')?.value;
+
+      if (agingFilter) {
+        loans = loans.filter(l => {
+          const days = getDaysOverdue(l);
+          if (agingFilter === '30') return days <= 30;
+          if (agingFilter === '60') return days > 30 && days <= 60;
+          if (agingFilter === '90') return days > 60 && days <= 90;
+          if (agingFilter === '90+') return days > 90;
+          return true;
+        });
+      }
+
+      if (productFilter) {
+        loans = loans.filter(l => l.loan_product === productFilter);
+      }
+
+      if (amountFilter) {
+        loans = loans.filter(l => {
+          const amount = l.total_outstanding_balance;
+          if (amountFilter === 'small') return amount < 100000;
+          if (amountFilter === 'medium') return amount >= 100000 && amount <= 500000;
+          if (amountFilter === 'large') return amount > 500000;
+          return true;
+        });
+      }
+
+      renderLoanCards(loans, 'overdue-list');
+    }
+
+    function renderLoanCards(loans, containerId) {
+      const container = document.getElementById(containerId);
+      if (!loans.length) {
+        container.innerHTML = `
+          <div class="complaints-empty">
+            <i class="fas fa-inbox complaints-empty-icon"></i>
+            <div class="complaints-empty-title">No loans found</div>
+            <div class="complaints-empty-text">No loans match your criteria</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = loans.map(l => {
+        const daysOverdue = getDaysOverdue(l);
+        const priorityClass = daysOverdue > 90 ? 'critical' : daysOverdue > 60 ? 'high' : daysOverdue > 30 ? 'medium' : 'low';
+        
+        return `
+          <div class="complaint-card priority-${priorityClass}" onclick="showLoanDetail('${l.loan_id}')" data-testid="loan-card-${l.loan_id}">
+            <div class="complaint-header">
+              <span class="complaint-ticket">${l.loan_id}</span>
+              <span class="complaint-time">${daysOverdue > 0 ? daysOverdue + ' days overdue' : l.loan_status}</span>
+            </div>
+            <div class="complaint-customer">${l.customer_id}</div>
+            <div class="complaint-category">${l.loan_product} • ${Utils.formatCurrency(l.loan_amount)}</div>
+            <div class="complaint-description">
+              Outstanding: ${Utils.formatCurrency(l.total_outstanding_balance)} | 
+              Due: ${Utils.formatDate(l.next_payment_due_date)}
+            </div>
+            <div class="complaint-footer">
+              <div class="complaint-assignee">
+                <span style="color: var(--text-muted)">${l.installments_paid}/${l.installments_agreed} installments</span>
+              </div>
+              <div>
+                ${App.formatters.status(l.loan_status)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function populateProductFilter() {
+      if (!appData) return;
+      const products = [...new Set(appData.loans.map(l => l.loan_product).filter(Boolean))];
+      const select = document.getElementById('product-filter');
+      products.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p;
+        option.textContent = p;
+        select.appendChild(option);
+      });
+    }
+
+    function applyOverdueFilters() {
+      renderOverdueLoans(document.getElementById('overdue-search')?.value || '');
+    }
+
+    function clearOverdueFilters() {
+      document.getElementById('aging-filter').value = '';
+      document.getElementById('product-filter').value = '';
+      document.getElementById('amount-filter').value = '';
+      document.getElementById('overdue-search').value = '';
+      renderOverdueLoans();
+    }
+
+    function renderNPLSection() {
+      const nplLoans = getNPLLoans();
+      const totalNPL = Utils.sumBy(nplLoans, 'total_outstanding_balance');
+
+      const stats = [
+        { icon: 'ban', value: nplLoans.length, label: 'Total NPL', color: '#dc2626' },
+        { icon: 'money-bill', value: Utils.formatCurrency(totalNPL), label: 'NPL Amount', color: '#dc2626' },
+        { icon: 'user-times', value: nplLoans.filter(l => l.loan_status === 'Default').length, label: 'Defaults', color: '#7c3aed' },
+        { icon: 'file-alt', value: nplLoans.filter(l => l.loan_status === 'Written Off').length, label: 'Written Off', color: '#64748b' }
+      ];
+
+      App.renderStats('npl-stats', stats);
+      renderLoanCards(nplLoans, 'npl-list');
+    }
+
+    function renderLoanEscalations() {
+      const escalations = getLoanEscalations();
+      
+      if (!escalations.length) {
+        document.getElementById('loan-escalations-list').innerHTML = `
+          <div class="complaints-empty">
+            <i class="fas fa-inbox complaints-empty-icon"></i>
+            <div class="complaints-empty-title">No loan escalations</div>
+            <div class="complaints-empty-text">No loan-related complaints have been escalated</div>
+          </div>
+        `;
+        return;
+      }
+
+      document.getElementById('loan-escalations-list').innerHTML = escalations.map(c => `
+        <div class="complaint-card priority-${c.priority.toLowerCase()}" onclick="showComplaintDetail('${c.id}')" data-testid="escalation-${c.id}">
+          <div class="complaint-header">
+            <span class="complaint-ticket">${c.ticketNumber}</span>
+            <span class="complaint-time">${Utils.formatRelativeTime(c.createdAt)}</span>
+          </div>
+          <div class="complaint-customer">${c.customerName || 'Unknown'}</div>
+          <div class="complaint-category">${c.category} • ${c.subject || 'No subject'}</div>
+          <div class="complaint-description">${c.description || 'No description'}</div>
+          <div class="complaint-footer">
+            <div class="complaint-assignee">
+              ${c.assignedToName ? `
+                <div class="complaint-assignee-avatar">${Utils.getInitials(c.assignedToName)}</div>
+                <span>${c.assignedToName}</span>
+              ` : '<span style="color: var(--text-muted)">Unassigned</span>'}
+            </div>
+            ${App.formatters.status(c.status)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderPerformanceSection() {
+      const analytics = SheetsAPI.getLoanAnalytics(appData.loans);
+      
+      const stats = [
+        { icon: 'coins', value: Utils.formatCurrency(analytics.totalCollected), label: 'Total Collected', color: '#059669' },
+        { icon: 'chart-line', value: Utils.formatPercent(analytics.collectionRate), label: 'Collection Rate', color: '#059669' },
+        { icon: 'percentage', value: Utils.formatPercent(analytics.nplRatio), label: 'NPL Ratio', color: analytics.nplRatio > 5 ? '#dc2626' : '#059669' },
+        { icon: 'clock', value: Utils.formatNumber(analytics.avgTenure, 0) + ' mo', label: 'Avg Tenure', color: '#0284c7' }
+      ];
+
+      App.renderStats('performance-stats', stats);
+
+      // Insights
+      const topProduct = Object.entries(analytics.byProduct).sort((a, b) => b[1] - a[1])[0];
+      
+      document.getElementById('insights-grid').innerHTML = `
+        <div class="insight-card">
+          <div class="insight-title"><i class="fas fa-lightbulb"></i> Top Loan Product</div>
+          <div class="insight-content">
+            <span class="insight-metric">${topProduct ? topProduct[0] : 'N/A'}</span> has the most active loans with ${topProduct ? topProduct[1] : 0} accounts.
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title"><i class="fas fa-coins"></i> Outstanding Balance</div>
+          <div class="insight-content">
+            Total outstanding balance across all loans: <span class="insight-metric">${Utils.formatCurrency(analytics.totalOutstanding)}</span>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title"><i class="fas fa-hand-holding-usd"></i> Average Loan</div>
+          <div class="insight-content">
+            Average loan amount: <span class="insight-metric">${Utils.formatCurrency(analytics.avgLoanAmount)}</span> at ${Utils.formatPercent(analytics.avgInterestRate)} interest.
+          </div>
+        </div>
+      `;
+    }
+
+    function showLoanDetail(loanId) {
+      currentLoan = appData.loans.find(l => l.loan_id === loanId);
+      if (!currentLoan) return;
+
+      const daysOverdue = getDaysOverdue(currentLoan);
+
+      document.getElementById('loan-detail-content').innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+          <div>
+            <div style="font-size: 1.25rem; font-weight: 600; color: var(--accent-secondary); font-family: 'IBM Plex Mono', monospace;">${currentLoan.loan_id}</div>
+            <div style="margin-top: 0.5rem;">
+              ${App.formatters.status(currentLoan.loan_status)}
+              ${daysOverdue > 0 ? `<span class="badge badge-danger" style="margin-left: 0.5rem;">${daysOverdue} days overdue</span>` : ''}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${Utils.formatCurrency(currentLoan.loan_amount)}</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">Loan Amount</div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Loan Information</div>
+          <div class="detail-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="detail-item">
+              <span class="detail-label">Product</span>
+              <span class="detail-value">${currentLoan.loan_product || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Purpose</span>
+              <span class="detail-value">${currentLoan.purpose || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Interest Rate</span>
+              <span class="detail-value">${currentLoan.interest_rate}%</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tenure</span>
+              <span class="detail-value">${currentLoan.tenure_months} months</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Monthly Payment</span>
+              <span class="detail-value">${Utils.formatCurrency(currentLoan.monthly_payment)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Disbursement Date</span>
+              <span class="detail-value">${Utils.formatDate(currentLoan.disbursement_date)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Payment Status</div>
+          <div class="detail-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="detail-item">
+              <span class="detail-label">Total Outstanding</span>
+              <span class="detail-value" style="color: var(--accent-warning); font-weight: 600;">${Utils.formatCurrency(currentLoan.total_outstanding_balance)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Principal Outstanding</span>
+              <span class="detail-value">${Utils.formatCurrency(currentLoan.principal_outstanding)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Interest Outstanding</span>
+              <span class="detail-value">${Utils.formatCurrency(currentLoan.interest_outstanding)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Paid to Date</span>
+              <span class="detail-value" style="color: var(--accent-primary);">${Utils.formatCurrency(currentLoan.amount_paid_to_date)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Installments Paid</span>
+              <span class="detail-value">${currentLoan.installments_paid} / ${currentLoan.installments_agreed}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Next Payment Due</span>
+              <span class="detail-value" style="color: ${daysOverdue > 0 ? 'var(--accent-danger)' : 'var(--text-primary)'};">${Utils.formatDate(currentLoan.next_payment_due_date)}</span>
+            </div>
+          </div>
+          
+          <div style="margin-top: 1rem;">
+            <div class="detail-label" style="margin-bottom: 0.5rem;">Repayment Progress</div>
+            <div class="progress" style="height: 12px;">
+              <div class="progress-bar ${currentLoan.installments_paid / currentLoan.installments_agreed < 0.5 ? 'danger' : ''}" 
+                   style="width: ${(currentLoan.installments_paid / currentLoan.installments_agreed) * 100}%;"></div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+              ${Utils.formatPercent((currentLoan.installments_paid / currentLoan.installments_agreed) * 100)} complete
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Customer & Collateral</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Customer ID</span>
+              <span class="detail-value">${currentLoan.customer_id}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Collateral Type</span>
+              <span class="detail-value">${currentLoan.collateral_type || 'None'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Collateral Value</span>
+              <span class="detail-value">${Utils.formatCurrency(currentLoan.collateral_value)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Loan Officer</span>
+              <span class="detail-value">${currentLoan.loan_officer || '-'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      App.showModal('loan-detail-modal');
+    }
+
+    function initiateRecoveryAction() {
+      if (!currentLoan) return;
+      
+      App.hideModal('loan-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Log Recovery Action';
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Action Type *</label>
+          <select id="action-type" class="form-select" data-testid="action-type">
+            <option value="call">Phone Call</option>
+            <option value="visit">Site Visit</option>
+            <option value="letter">Demand Letter</option>
+            <option value="payment">Payment Promise</option>
+            <option value="restructure">Restructure Request</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes *</label>
+          <textarea id="action-notes" class="form-textarea" placeholder="Describe the action taken and outcome..." required data-testid="action-notes"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Next Follow-up Date</label>
+          <input type="date" id="followup-date" class="form-input" data-testid="followup-date">
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const actionType = document.getElementById('action-type').value;
+        const notes = document.getElementById('action-notes').value;
+        if (!notes) {
+          Utils.showToast('Please enter action notes', 'error');
+          return;
+        }
+        
+        // In production, this would save to the backend
+        Utils.showToast(`Recovery action logged for ${currentLoan.loan_id}`, 'success');
+        App.hideModal('action-modal');
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function showComplaintDetail(id) {
+      // Similar to operations dashboard - show complaint detail
+      const complaint = Complaints.getById(id);
+      if (!complaint) return;
+      
+      Utils.showToast('Opening complaint detail...', 'info');
+      // Could redirect or show modal
+    }
+  </script>
+</body>
+</html>
