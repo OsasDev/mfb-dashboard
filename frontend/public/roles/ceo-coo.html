@@ -701,23 +701,125 @@
         { icon: 'receipt', value: Utils.formatNumber(txn.total), label: 'Total Transactions', color: '#00d4aa' },
         { icon: 'check-circle', value: Utils.formatNumber(txn.successCount), label: 'Successful', color: '#00d4aa' },
         { icon: 'times-circle', value: Utils.formatNumber(txn.failedCount), label: 'Failed', color: '#ef4444' },
+        { icon: 'percentage', value: Utils.formatPercent(txn.successRate), label: 'Success Rate', color: '#0ea5e9' },
         { icon: 'calculator', value: Utils.formatCurrency(txn.averageAmount), label: 'Average Amount', color: '#0ea5e9' }
       ];
       App.renderStats('transaction-stats', stats);
     }
 
+    let ceoRoutesChart = null;
+    let ceoRoutePerformanceChart = null;
+
     function renderRecentTransactions(transactions) {
+      // Render route charts
+      renderRouteCharts(transactions);
+
+      // Render table with route column
       App.renderTable('recent-transactions-table', {
         columns: [
           { key: 'transaction_id', header: 'ID' },
           { key: 'transaction_type', header: 'Type' },
           { key: 'amount', header: 'Amount', render: v => Utils.formatCurrency(v) },
           { key: 'channel', header: 'Channel' },
+          { key: 'route', header: 'Route', render: v => `<span style="padding: 0.25rem 0.5rem; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">${v || 'Unknown'}</span>` },
           { key: 'transaction_status', header: 'Status', render: v => App.formatters.status(v) },
           { key: 'transaction_date', header: 'Date', render: v => Utils.formatDate(v) }
         ],
         data: transactions
       });
+    }
+
+    function renderRouteCharts(transactions) {
+      // Count by route
+      const byRoute = {};
+      transactions.forEach(t => {
+        const route = t.route || 'Unknown';
+        byRoute[route] = (byRoute[route] || 0) + 1;
+      });
+
+      // Routes distribution chart
+      const routesCtx = document.getElementById('ceo-routes-chart');
+      if (routesCtx) {
+        const ctx = routesCtx.getContext('2d');
+        const routeLabels = Object.keys(byRoute);
+        const routeData = Object.values(byRoute);
+        const routeColors = ['#3b82f6', '#059669', '#f59e0b', '#7c3aed', '#ec4899'];
+
+        if (ceoRoutesChart) ceoRoutesChart.destroy();
+        ceoRoutesChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: routeLabels,
+            datasets: [{
+              data: routeData,
+              backgroundColor: routeColors.slice(0, routeLabels.length),
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' }
+            }
+          }
+        });
+      }
+
+      // Success rate by route
+      const routePerformance = {};
+      transactions.forEach(t => {
+        const route = t.route || 'Unknown';
+        if (!routePerformance[route]) {
+          routePerformance[route] = { total: 0, success: 0 };
+        }
+        routePerformance[route].total++;
+        if (t.transaction_status === 'Success' || t.transaction_status === 'Successful') {
+          routePerformance[route].success++;
+        }
+      });
+
+      const perfCtx = document.getElementById('ceo-route-performance-chart');
+      if (perfCtx) {
+        const ctx = perfCtx.getContext('2d');
+        const perfLabels = Object.keys(routePerformance);
+        const perfData = perfLabels.map(route => {
+          const perf = routePerformance[route];
+          return perf.total > 0 ? (perf.success / perf.total) * 100 : 0;
+        });
+
+        if (ceoRoutePerformanceChart) ceoRoutePerformanceChart.destroy();
+        ceoRoutePerformanceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: perfLabels,
+            datasets: [{
+              label: 'Success Rate (%)',
+              data: perfData,
+              backgroundColor: '#059669',
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: { 
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
     }
 
     function renderCustomerStats(cust) {
