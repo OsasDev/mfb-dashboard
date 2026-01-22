@@ -86,6 +86,37 @@
             <p class="page-subtitle">Strategic insights and performance metrics</p>
           </div>
           <div class="header-actions">
+            <div class="dropdown" style="position: relative; display: inline-block;">
+              <button class="btn btn-secondary" id="export-btn" data-testid="export-btn">
+                <i class="fas fa-download"></i>
+                Export
+              </button>
+              <div class="dropdown-menu" id="export-menu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 0.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); min-width: 200px; box-shadow: var(--shadow-lg); z-index: 100;">
+                <div class="dropdown-item" onclick="exportTransactionsCSV()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;" data-testid="export-transactions-csv">
+                  <i class="fas fa-file-csv"></i> Transactions (CSV)
+                </div>
+                <div class="dropdown-item" onclick="exportCustomersCSV()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;" data-testid="export-customers-csv">
+                  <i class="fas fa-file-csv"></i> Customers (CSV)
+                </div>
+                <div class="dropdown-item" onclick="exportLoansCSV()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;" data-testid="export-loans-csv">
+                  <i class="fas fa-file-csv"></i> Loans (CSV)
+                </div>
+                <div style="border-top: 1px solid var(--border-color); margin: 0.5rem 0;"></div>
+                <div class="dropdown-item" onclick="exportTransactionsExcel()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;" data-testid="export-transactions-excel">
+                  <i class="fas fa-file-excel"></i> Transactions (Excel)
+                </div>
+                <div class="dropdown-item" onclick="exportCustomersExcel()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;" data-testid="export-customers-excel">
+                  <i class="fas fa-file-excel"></i> Customers (Excel)
+                </div>
+                <div class="dropdown-item" onclick="exportLoansExcel()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;" data-testid="export-loans-excel">
+                  <i class="fas fa-file-excel"></i> Loans (Excel)
+                </div>
+                <div style="border-top: 1px solid var(--border-color); margin: 0.5rem 0;"></div>
+                <div class="dropdown-item" onclick="exportAnalyticsPDF()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;" data-testid="export-analytics-pdf">
+                  <i class="fas fa-file-pdf"></i> Analytics Report (PDF)
+                </div>
+              </div>
+            </div>
             <button class="btn btn-secondary" id="refresh-btn" data-testid="refresh-btn">
               <i class="fas fa-sync-alt"></i>
               Refresh Data
