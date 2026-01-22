@@ -7,7 +7,14 @@ const Auth = {
   // Initialize auth
   async init() {
     try {
-      const response = await fetch('./data/users.json');
+      // Try both paths for root and role pages
+      let response;
+      try {
+        response = await fetch('./data/users.json');
+        if (!response.ok) throw new Error('Not found');
+      } catch {
+        response = await fetch('../data/users.json');
+      }
       const data = await response.json();
       this.users = data.users;
       
