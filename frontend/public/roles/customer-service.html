@@ -601,8 +601,24 @@
       // Customer lookup
       document.getElementById('customer-lookup-input').addEventListener('input', Utils.debounce(handleCustomerLookup, 300));
 
+      // Customer filter dropdowns
+      ['customer-filter-state', 'customer-filter-type', 'customer-filter-kyc'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('change', () => {
+            const query = document.getElementById('customer-lookup-input')?.value?.toLowerCase() || '';
+            filterAndDisplayCustomers(query);
+          });
+        }
+      });
+
       // Use customer button
       document.getElementById('use-customer-btn').addEventListener('click', handleUseCustomer);
+
+      // Populate state filter options after data loads
+      setTimeout(() => {
+        if (appData) populateStateFilter();
+      }, 2000);
     }
 
     function populateStaffDropdown() {
