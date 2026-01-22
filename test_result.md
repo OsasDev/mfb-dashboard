@@ -103,10 +103,13 @@
 #====================================================================================================
 
 user_problem_statement: |
-  On the operations dashboard, operations team should also be able to view full transaction details, 
+  1. On the operations dashboard, operations team should also be able to view full transaction details, 
   see their level of successful transactions vs failed, see what route transactions go through the most 
   (internal, interswitch, NIBSS or belema switch), and so on. The analytics should also be visible to 
   CEO, COO, and CFO roles.
+  
+  2. On the loan recovery portal, when we are viewing Overdue loans, we should be able to see the 
+  customers name, phone number and email as well.
 
 backend:
   - task: "No backend changes required (using existing Google Sheets data source)"
