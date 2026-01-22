@@ -638,14 +638,32 @@
       }).join('');
     }
 
+    function enrichLoansWithCustomerData(loans) {
+      if (!appData || !appData.customers) return loans;
+      
+      return loans.map(loan => {
+        const customer = appData.customers.find(c => c.customer_id === loan.customer_id);
+        return {
+          ...loan,
+          customer_name: customer?.customer_name || 'Unknown Customer',
+          customer_phone: customer?.phone_number || 'N/A',
+          customer_email: customer?.email || 'N/A',
+          customer_address: customer?.address || 'N/A'
+        };
+      });
+    }
+
     function renderOverdueLoans(searchQuery = '') {
-      let loans = getOverdueLoans();
+      let loans = enrichLoansWithCustomerData(getOverdueLoans());
       
       // Apply search
       if (searchQuery) {
         loans = loans.filter(l => 
           l.loan_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          l.customer_id?.toLowerCase().includes(searchQuery.toLowerCase())
+          l.customer_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.customer_phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.customer_email?.toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
 
