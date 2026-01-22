@@ -880,8 +880,12 @@
     }
 
     function showLoanDetail(loanId) {
-      currentLoan = appData.loans.find(l => l.loan_id === loanId);
-      if (!currentLoan) return;
+      const loan = appData.loans.find(l => l.loan_id === loanId);
+      if (!loan) return;
+      
+      // Enrich with customer data
+      const enrichedLoans = enrichLoansWithCustomerData([loan]);
+      currentLoan = enrichedLoans[0];
 
       const daysOverdue = getDaysOverdue(currentLoan);
 
@@ -897,6 +901,44 @@
           <div style="text-align: right;">
             <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">${Utils.formatCurrency(currentLoan.loan_amount)}</div>
             <div style="font-size: 0.875rem; color: var(--text-muted);">Loan Amount</div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Customer Information</div>
+          <div class="detail-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="detail-item">
+              <span class="detail-label">Customer Name</span>
+              <span class="detail-value" style="font-weight: 600; color: var(--text-primary);">${currentLoan.customer_name || 'Unknown'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Customer ID</span>
+              <span class="detail-value" style="font-family: monospace;">${currentLoan.customer_id}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Phone Number</span>
+              <span class="detail-value">
+                <a href="tel:${currentLoan.customer_phone}" style="color: var(--accent-primary); text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fas fa-phone" style="font-size: 0.875rem;"></i>
+                  ${currentLoan.customer_phone || 'N/A'}
+                </a>
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Email Address</span>
+              <span class="detail-value">
+                <a href="mailto:${currentLoan.customer_email}" style="color: var(--accent-primary); text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fas fa-envelope" style="font-size: 0.875rem;"></i>
+                  ${currentLoan.customer_email || 'N/A'}
+                </a>
+              </span>
+            </div>
+            ${currentLoan.customer_address && currentLoan.customer_address !== 'N/A' ? `
+              <div class="detail-item" style="grid-column: 1 / -1;">
+                <span class="detail-label">Address</span>
+                <span class="detail-value">${currentLoan.customer_address}</span>
+              </div>
+            ` : ''}
           </div>
         </div>
 
@@ -972,12 +1014,8 @@
         </div>
 
         <div class="detail-section">
-          <div class="detail-section-title">Customer & Collateral</div>
+          <div class="detail-section-title">Collateral & Loan Officer</div>
           <div class="detail-grid">
-            <div class="detail-item">
-              <span class="detail-label">Customer ID</span>
-              <span class="detail-value">${currentLoan.customer_id}</span>
-            </div>
             <div class="detail-item">
               <span class="detail-label">Collateral Type</span>
               <span class="detail-value">${currentLoan.collateral_type || 'None'}</span>
