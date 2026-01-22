@@ -180,6 +180,31 @@ frontend:
           - Added initRouteCharts() function
           Needs testing to verify charts are displayed and updated correctly.
 
+  - task: "Add Customer Information to Loan Recovery Portal - Overdue Loans"
+    implemented: true
+    working: false
+    file: "/app/frontend/public/roles/loan-recovery.html"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: |
+          Enhanced loan recovery portal to display customer information:
+          - Created enrichLoansWithCustomerData() function to join loan and customer data
+          - Updated renderLoanCards() to display customer name, phone, and email with icons
+          - Updated renderCriticalLoans() to show customer info in overview section
+          - Enhanced showLoanDetail() modal with complete customer information section including:
+            * Customer Name (highlighted)
+            * Customer ID
+            * Phone Number (clickable tel: link)
+            * Email Address (clickable mailto: link)
+            * Address (if available)
+          - Updated search functionality to include customer name, phone, and email
+          All overdue loan views (Overview, Overdue Loans, NPL Cases) now display full customer contact details.
+          Needs testing to verify customer information displays correctly.
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
