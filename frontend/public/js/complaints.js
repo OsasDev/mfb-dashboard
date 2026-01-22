@@ -15,14 +15,15 @@ const Complaints = {
       if (!configResponse.ok) throw new Error('Failed to load config');
       this.config = await configResponse.json();
       
-      // Use same origin to avoid CORS issues - just use relative path
-      // The /api prefix routes to the backend through the proxy
-      this.apiBase = window.location.origin + '/api/complaints';
+      // Use same origin to avoid CORS issues
+      // Always use trailing slash to avoid FastAPI redirect issues
+      this.apiBase = '/api/complaints';
       
       // Try to load from backend first
       if (this.useBackend) {
         try {
-          const response = await fetch(this.apiBase);
+          // Always include trailing slash to avoid redirect
+          const response = await fetch(this.apiBase + '/');
           if (response.ok) {
             this.complaints = await response.json();
             console.log('Loaded complaints from backend:', this.complaints.length);
