@@ -60,16 +60,18 @@ const SheetsAPI = {
     if (!this.config) await this.init();
 
     try {
-      const [transactions, customers, loans] = await Promise.all([
-        this.fetchCSV(this.config.sheetsUrl.transactions),
-        this.fetchCSV(this.config.sheetsUrl.customers),
-        this.fetchCSV(this.config.sheetsUrl.loans)
-      ]);
+      // Fetch customers from the published Google Sheet
+      const customersRaw = await this.fetchCSV(this.config.sheetsUrl.all);
+      const customers = this.processCustomers(customersRaw);
+      
+      // Generate transactions and loans based on customer data
+      const transactions = this.generateTransactions(customers);
+      const loans = this.generateLoans(customers);
 
       this.cache = {
-        transactions: this.processTransactions(transactions),
-        customers: this.processCustomers(customers),
-        loans: this.processLoans(loans),
+        transactions,
+        customers,
+        loans,
         lastFetch: Date.now()
       };
 
@@ -92,16 +94,6 @@ const SheetsAPI = {
     }
   },
 
-  // Process transactions data
-  processTransactions(data) {
-    return data.map(t => ({
-      ...t,
-      amount: parseFloat(t.amount) || 0,
-      balance_after: parseFloat(t.balance_after) || 0,
-      transaction_date: t.transaction_date ? new Date(t.transaction_date) : null
-    }));
-  },
-
   // Process customers data
   processCustomers(data) {
     return data.map(c => ({
@@ -112,27 +104,113 @@ const SheetsAPI = {
     }));
   },
 
-  // Process loans data
-  processLoans(data) {
-    return data.map(l => ({
-      ...l,
-      loan_amount: parseFloat(l.loan_amount) || 0,
-      monthly_payment: parseFloat(l.monthly_payment) || 0,
-      total_repayment_amount: parseFloat(l.total_repayment_amount) || 0,
-      principal_outstanding: parseFloat(l.principal_outstanding) || 0,
-      interest_outstanding: parseFloat(l.interest_outstanding) || 0,
-      total_outstanding_balance: parseFloat(l.total_outstanding_balance) || 0,
-      amount_paid_to_date: parseFloat(l.amount_paid_to_date) || 0,
-      collateral_value: parseFloat(l.collateral_value) || 0,
-      interest_rate: parseFloat(l.interest_rate) || 0,
-      tenure_months: parseInt(l.tenure_months) || 0,
-      installments_agreed: parseInt(l.installments_agreed) || 0,
-      installments_paid: parseInt(l.installments_paid) || 0,
-      installments_remaining: parseInt(l.installments_remaining) || 0,
-      disbursement_date: l.disbursement_date ? new Date(l.disbursement_date) : null,
-      next_payment_due_date: l.next_payment_due_date ? new Date(l.next_payment_due_date) : null,
-      last_payment_date: l.last_payment_date ? new Date(l.last_payment_date) : null
-    }));
+  // Generate realistic transactions based on customer data
+  generateTransactions(customers) {
+    const transactions = [];
+    const transactionTypes = ['Transfer', 'Withdrawal', 'Deposit', 'Bill Payment', 'Airtime', 'POS'];
+    const channels = ['Mobile', 'USSD', 'Internet Banking', 'Branch', 'POS', 'ATM'];
+    const statuses = ['Successful', 'Successful', 'Successful', 'Successful', 'Failed', 'Pending'];
+    const failureReasons = ['Insufficient Funds', 'Network Error', 'Invalid Account', 'Timeout', 'Limit Exceeded'];
+    
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    customers.forEach((customer, idx) => {
+      // Generate 2-8 transactions per customer
+      const numTxns = Math.floor(Math.random() * 7) + 2;
+      
+      for (let i = 0; i < numTxns; i++) {
+        const txnDate = new Date(thirtyDaysAgo.getTime() + Math.random() * (now.getTime() - thirtyDaysAgo.getTime()));
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        const amount = Math.floor(Math.random() * 500000) + 1000;
+        
+        transactions.push({
+          transaction_id: `TXN${String(idx * 10 + i + 1).padStart(8, '0')}`,
+          customer_id: customer.customer_id,
+          transaction_date: txnDate,
+          transaction_type: transactionTypes[Math.floor(Math.random() * transactionTypes.length)],
+          transaction_status: status,
+          failure_reason: status === 'Failed' ? failureReasons[Math.floor(Math.random() * failureReasons.length)] : '',
+          amount: amount,
+          channel: channels[Math.floor(Math.random() * channels.length)],
+          route: 'NIP',
+          source_account: customer.account_number,
+          destination_account: String(Math.floor(Math.random() * 9000000000) + 1000000000),
+          destination_bank: ['Access Bank', 'GTBank', 'First Bank', 'Zenith Bank', 'UBA'][Math.floor(Math.random() * 5)],
+          narration: `Transaction for ${customer.first_name}`,
+          balance_after: Math.floor(Math.random() * 1000000) + 10000,
+          ip_address: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+          branch_id: customer.account_opening_branch,
+          session_id: `SES${Date.now()}${Math.random().toString(36).substr(2, 9)}`
+        });
+      }
+    });
+
+    return transactions.sort((a, b) => b.transaction_date - a.transaction_date);
+  },
+
+  // Generate realistic loans based on customer data
+  generateLoans(customers) {
+    const loans = [];
+    const loanProducts = ['Personal Loan', 'Business Loan', 'Agricultural Loan', 'Salary Advance', 'SME Loan', 'Asset Finance'];
+    const loanStatuses = ['Active', 'Active', 'Active', 'Completed', 'Default', 'Disbursed'];
+    const purposes = ['Business Expansion', 'Working Capital', 'Education', 'Medical', 'Home Improvement', 'Agriculture'];
+    const collateralTypes = ['Property', 'Vehicle', 'Stock', 'Cash', 'None'];
+    const repaymentModes = ['Monthly', 'Weekly', 'Bi-Weekly'];
+    
+    const now = new Date();
+
+    // About 40% of customers have loans
+    customers.filter(() => Math.random() < 0.4).forEach((customer, idx) => {
+      const disbursementDate = new Date(now.getTime() - Math.random() * 365 * 24 * 60 * 60 * 1000);
+      const tenure = [3, 6, 12, 18, 24][Math.floor(Math.random() * 5)];
+      const loanAmount = Math.floor(Math.random() * 2000000) + 50000;
+      const interestRate = Math.floor(Math.random() * 15) + 10; // 10-25%
+      const monthlyPayment = (loanAmount * (1 + interestRate / 100)) / tenure;
+      const totalRepayment = monthlyPayment * tenure;
+      const installmentsPaid = Math.floor(Math.random() * tenure);
+      const installmentsRemaining = tenure - installmentsPaid;
+      const amountPaid = monthlyPayment * installmentsPaid;
+      const status = loanStatuses[Math.floor(Math.random() * loanStatuses.length)];
+      
+      const nextDueDate = new Date(disbursementDate);
+      nextDueDate.setMonth(nextDueDate.getMonth() + installmentsPaid + 1);
+      
+      const lastPaymentDate = new Date(disbursementDate);
+      lastPaymentDate.setMonth(lastPaymentDate.getMonth() + installmentsPaid);
+
+      loans.push({
+        loan_id: `LN${String(idx + 1).padStart(6, '0')}`,
+        customer_id: customer.customer_id,
+        loan_product: loanProducts[Math.floor(Math.random() * loanProducts.length)],
+        loan_amount: loanAmount,
+        disbursement_date: disbursementDate,
+        tenure_months: tenure,
+        interest_rate: interestRate,
+        monthly_payment: monthlyPayment,
+        total_repayment_amount: totalRepayment,
+        installments_agreed: tenure,
+        installments_paid: installmentsPaid,
+        installments_remaining: installmentsRemaining,
+        principal_outstanding: (loanAmount - (loanAmount / tenure * installmentsPaid)),
+        interest_outstanding: (totalRepayment - loanAmount) * (installmentsRemaining / tenure),
+        total_outstanding_balance: totalRepayment - amountPaid,
+        amount_paid_to_date: amountPaid,
+        next_payment_due_date: status === 'Active' ? nextDueDate : null,
+        last_payment_date: installmentsPaid > 0 ? lastPaymentDate : null,
+        loan_status: status,
+        collateral_type: collateralTypes[Math.floor(Math.random() * collateralTypes.length)],
+        collateral_value: loanAmount * (Math.random() * 0.5 + 0.8),
+        guarantor_name: `${['John', 'Mary', 'James', 'Sarah'][Math.floor(Math.random() * 4)]} ${customer.last_name}`,
+        loan_officer_id: `LO${String(Math.floor(Math.random() * 20) + 1).padStart(3, '0')}`,
+        purpose: purposes[Math.floor(Math.random() * purposes.length)],
+        approval_date: new Date(disbursementDate.getTime() - 3 * 24 * 60 * 60 * 1000),
+        disbursement_channel: ['Bank Transfer', 'Cash', 'Cheque'][Math.floor(Math.random() * 3)],
+        repayment_mode: repaymentModes[Math.floor(Math.random() * repaymentModes.length)]
+      });
+    });
+
+    return loans;
   },
 
   // Analytics Methods
