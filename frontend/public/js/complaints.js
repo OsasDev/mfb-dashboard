@@ -1,8 +1,11 @@
 // Complaints Management System for MFB Dashboard
+// Using Backend API with localStorage fallback
 
 const Complaints = {
   complaints: [],
   config: null,
+  useBackend: true, // Toggle for backend API usage
+  apiBase: '/api/complaints',
 
   // Initialize complaints system
   async init() {
@@ -12,7 +15,21 @@ const Complaints = {
       if (!configResponse.ok) throw new Error('Failed to load config');
       this.config = await configResponse.json();
       
-      // Load complaints from localStorage
+      // Try to load from backend first
+      if (this.useBackend) {
+        try {
+          const response = await fetch(this.apiBase);
+          if (response.ok) {
+            this.complaints = await response.json();
+            console.log('Loaded complaints from backend:', this.complaints.length);
+            return true;
+          }
+        } catch (err) {
+          console.warn('Backend unavailable, falling back to localStorage');
+        }
+      }
+      
+      // Fallback to localStorage
       this.complaints = Utils.storage.get('mfb_complaints', []);
       return true;
     } catch (error) {
@@ -37,10 +54,33 @@ const Complaints = {
   },
 
   // Create new complaint
-  create(complaintData) {
+  async create(complaintData) {
     const user = Auth.getCurrentUser();
     const now = new Date().toISOString();
     
+    if (this.useBackend) {
+      try {
+        const response = await fetch(this.apiBase, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...complaintData,
+            createdBy: user ? user.id : 'System',
+            createdByName: user ? user.name : 'System'
+          })
+        });
+        
+        if (response.ok) {
+          const complaint = await response.json();
+          this.complaints.unshift(complaint);
+          return complaint;
+        }
+      } catch (err) {
+        console.error('Backend create failed:', err);
+      }
+    }
+    
+    // Fallback to localStorage
     const complaint = {
       id: 'CMP' + Date.now().toString(36).toUpperCase(),
       ticketNumber: 'TKT-' + String(this.complaints.length + 1).padStart(6, '0'),
@@ -72,14 +112,32 @@ const Complaints = {
   },
 
   // Update complaint
-  update(id, updates) {
+  async update(id, updates) {
     const index = this.complaints.findIndex(c => c.id === id);
     if (index === -1) return null;
 
+    if (this.useBackend) {
+      try {
+        const response = await fetch(`${this.apiBase}/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+        
+        if (response.ok) {
+          const updated = await response.json();
+          this.complaints[index] = updated;
+          return updated;
+        }
+      } catch (err) {
+        console.error('Backend update failed:', err);
+      }
+    }
+
+    // Fallback
     const user = Auth.getCurrentUser();
     const now = new Date().toISOString();
 
-    // Add history entry
     const historyEntry = {
       action: 'Updated',
       timestamp: now,
@@ -99,10 +157,37 @@ const Complaints = {
   },
 
   // Assign complaint
-  assign(id, staffId, staffName) {
+  async assign(id, staffId, staffName) {
     const complaint = this.getById(id);
     if (!complaint) return null;
 
+    if (this.useBackend) {
+      try {
+        const user = Auth.getCurrentUser();
+        const response = await fetch(`${this.apiBase}/${id}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'Assign',
+            user: user ? user.id : 'System',
+            userName: user ? user.name : 'System',
+            assignedTo: staffId,
+            assignedToName: staffName
+          })
+        });
+        
+        if (response.ok) {
+          const updated = await response.json();
+          const index = this.complaints.findIndex(c => c.id === id);
+          if (index !== -1) this.complaints[index] = updated;
+          return updated;
+        }
+      } catch (err) {
+        console.error('Backend assign failed:', err);
+      }
+    }
+
+    // Fallback
     const user = Auth.getCurrentUser();
     const now = new Date().toISOString();
 
@@ -122,10 +207,37 @@ const Complaints = {
   },
 
   // Escalate complaint
-  escalate(id, escalatedTo, reason) {
+  async escalate(id, escalatedTo, reason) {
     const complaint = this.getById(id);
     if (!complaint) return null;
 
+    if (this.useBackend) {
+      try {
+        const user = Auth.getCurrentUser();
+        const response = await fetch(`${this.apiBase}/${id}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'Escalate',
+            user: user ? user.id : 'System',
+            userName: user ? user.name : 'System',
+            escalatedTo: escalatedTo,
+            escalationReason: reason
+          })
+        });
+        
+        if (response.ok) {
+          const updated = await response.json();
+          const index = this.complaints.findIndex(c => c.id === id);
+          if (index !== -1) this.complaints[index] = updated;
+          return updated;
+        }
+      } catch (err) {
+        console.error('Backend escalate failed:', err);
+      }
+    }
+
+    // Fallback
     const user = Auth.getCurrentUser();
     const now = new Date().toISOString();
 
@@ -145,10 +257,36 @@ const Complaints = {
   },
 
   // Resolve complaint
-  resolve(id, resolution) {
+  async resolve(id, resolution) {
     const complaint = this.getById(id);
     if (!complaint) return null;
 
+    if (this.useBackend) {
+      try {
+        const user = Auth.getCurrentUser();
+        const response = await fetch(`${this.apiBase}/${id}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'Resolve',
+            user: user ? user.id : 'System',
+            userName: user ? user.name : 'System',
+            resolution: resolution
+          })
+        });
+        
+        if (response.ok) {
+          const updated = await response.json();
+          const index = this.complaints.findIndex(c => c.id === id);
+          if (index !== -1) this.complaints[index] = updated;
+          return updated;
+        }
+      } catch (err) {
+        console.error('Backend resolve failed:', err);
+      }
+    }
+
+    // Fallback
     const user = Auth.getCurrentUser();
     const now = new Date().toISOString();
 
@@ -168,10 +306,35 @@ const Complaints = {
   },
 
   // Close complaint
-  close(id) {
+  async close(id) {
     const complaint = this.getById(id);
     if (!complaint) return null;
 
+    if (this.useBackend) {
+      try {
+        const user = Auth.getCurrentUser();
+        const response = await fetch(`${this.apiBase}/${id}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'Close',
+            user: user ? user.id : 'System',
+            userName: user ? user.name : 'System'
+          })
+        });
+        
+        if (response.ok) {
+          const updated = await response.json();
+          const index = this.complaints.findIndex(c => c.id === id);
+          if (index !== -1) this.complaints[index] = updated;
+          return updated;
+        }
+      } catch (err) {
+        console.error('Backend close failed:', err);
+      }
+    }
+
+    // Fallback
     const user = Auth.getCurrentUser();
     const now = new Date().toISOString();
 
@@ -189,10 +352,36 @@ const Complaints = {
   },
 
   // Reopen complaint
-  reopen(id, reason) {
+  async reopen(id, reason) {
     const complaint = this.getById(id);
     if (!complaint) return null;
 
+    if (this.useBackend) {
+      try {
+        const user = Auth.getCurrentUser();
+        const response = await fetch(`${this.apiBase}/${id}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'Reopen',
+            user: user ? user.id : 'System',
+            userName: user ? user.name : 'System',
+            details: reason
+          })
+        });
+        
+        if (response.ok) {
+          const updated = await response.json();
+          const index = this.complaints.findIndex(c => c.id === id);
+          if (index !== -1) this.complaints[index] = updated;
+          return updated;
+        }
+      } catch (err) {
+        console.error('Backend reopen failed:', err);
+      }
+    }
+
+    // Fallback
     const user = Auth.getCurrentUser();
     const now = new Date().toISOString();
 
@@ -213,10 +402,36 @@ const Complaints = {
   },
 
   // Add note to complaint
-  addNote(id, note) {
+  async addNote(id, note) {
     const complaint = this.getById(id);
     if (!complaint) return null;
 
+    if (this.useBackend) {
+      try {
+        const user = Auth.getCurrentUser();
+        const response = await fetch(`${this.apiBase}/${id}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'Note Added',
+            user: user ? user.id : 'System',
+            userName: user ? user.name : 'System',
+            details: note
+          })
+        });
+        
+        if (response.ok) {
+          const updated = await response.json();
+          const index = this.complaints.findIndex(c => c.id === id);
+          if (index !== -1) this.complaints[index] = updated;
+          return updated;
+        }
+      } catch (err) {
+        console.error('Backend addNote failed:', err);
+      }
+    }
+
+    // Fallback
     const user = Auth.getCurrentUser();
     const now = new Date().toISOString();
 
@@ -333,7 +548,7 @@ const Complaints = {
     };
   },
 
-  // Save to localStorage
+  // Save to localStorage (fallback)
   save() {
     Utils.storage.set('mfb_complaints', this.complaints);
   },
@@ -342,7 +557,7 @@ const Complaints = {
   search(query) {
     const q = query.toLowerCase();
     return this.complaints.filter(c => 
-      c.ticketNumber.toLowerCase().includes(q) ||
+      c.ticketNumber?.toLowerCase().includes(q) ||
       c.customerName?.toLowerCase().includes(q) ||
       c.customerPhone?.toLowerCase().includes(q) ||
       c.customerAccountNumber?.toLowerCase().includes(q) ||
