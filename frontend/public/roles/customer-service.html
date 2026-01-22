@@ -934,52 +934,428 @@
     }
 
     async function handleCustomerLookup(e) {
-      const query = e.target.value.toLowerCase();
-      if (query.length < 2 || !appData) {
-        document.getElementById('customer-lookup-results').innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-user-search"></i>
-            <p>Enter a search term to find customers</p>
-          </div>
-        `;
-        return;
+      const query = e?.target?.value?.toLowerCase() || '';
+      filterAndDisplayCustomers(query);
+    }
+
+    function filterAndDisplayCustomers(searchQuery = '') {
+      if (!appData) return;
+
+      const stateFilter = document.getElementById('customer-filter-state')?.value || '';
+      const typeFilter = document.getElementById('customer-filter-type')?.value || '';
+      const kycFilter = document.getElementById('customer-filter-kyc')?.value || '';
+
+      let results = appData.customers;
+
+      // Apply search filter
+      if (searchQuery && searchQuery.length >= 2) {
+        results = results.filter(c =>
+          c.first_name?.toLowerCase().includes(searchQuery) ||
+          c.last_name?.toLowerCase().includes(searchQuery) ||
+          c.phone_number?.includes(searchQuery) ||
+          c.account_number?.includes(searchQuery) ||
+          c.email?.toLowerCase().includes(searchQuery) ||
+          c.customer_id?.toLowerCase().includes(searchQuery)
+        );
       }
 
-      const results = appData.customers.filter(c => 
-        c.first_name?.toLowerCase().includes(query) ||
-        c.last_name?.toLowerCase().includes(query) ||
-        c.phone_number?.includes(query) ||
-        c.account_number?.includes(query) ||
-        c.email?.toLowerCase().includes(query)
-      ).slice(0, 10);
+      // Apply state filter
+      if (stateFilter) {
+        results = results.filter(c => c.state === stateFilter);
+      }
+
+      // Apply type filter
+      if (typeFilter) {
+        results = results.filter(c => c.customer_type === typeFilter);
+      }
+
+      // Apply KYC filter
+      if (kycFilter) {
+        results = results.filter(c => c.kyc_status === kycFilter);
+      }
+
+      // Limit results for performance
+      results = results.slice(0, 50);
 
       if (results.length === 0) {
         document.getElementById('customer-lookup-results').innerHTML = `
           <div class="empty-state">
             <i class="fas fa-user-slash"></i>
-            <p>No customers found matching "${query}"</p>
+            <p>No customers found matching your criteria</p>
           </div>
         `;
         return;
       }
 
       document.getElementById('customer-lookup-results').innerHTML = results.map(c => `
-        <div class="card" style="margin-bottom: 1rem; cursor: pointer;">
+        <div class="card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="showCustomerDetail('${c.customer_id}')" data-testid="customer-card-${c.customer_id}">
           <div style="display: flex; align-items: center; gap: 1rem;">
-            <div class="user-avatar" style="background: var(--accent-secondary);">${Utils.getInitials(`${c.first_name} ${c.last_name}`)}</div>
+            <div class="user-avatar" style="background: var(--accent-secondary); width: 48px; height: 48px; font-size: 1rem;">${Utils.getInitials(`${c.first_name} ${c.last_name}`)}</div>
             <div style="flex: 1;">
-              <div style="font-weight: 500; color: var(--text-primary);">${c.first_name} ${c.last_name}</div>
+              <div style="font-weight: 500; color: var(--text-primary); font-size: 1rem;">${c.first_name} ${c.last_name}</div>
               <div style="font-size: 0.8125rem; color: var(--text-muted);">
-                ${c.phone_number || '-'} • ${c.account_number || c.customer_id}
+                <i class="fas fa-phone" style="width: 14px; margin-right: 4px;"></i>${c.phone_number || '-'} 
+                <span style="margin: 0 8px;">•</span>
+                <i class="fas fa-wallet" style="width: 14px; margin-right: 4px;"></i>${c.account_number || c.customer_id}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                <i class="fas fa-map-marker-alt" style="width: 14px; margin-right: 4px;"></i>${c.state || '-'} 
+                <span style="margin: 0 8px;">•</span>
+                <i class="fas fa-briefcase" style="width: 14px; margin-right: 4px;"></i>${c.employment_status || '-'}
               </div>
             </div>
             <div style="text-align: right;">
-              <div class="badge ${c.kyc_status === 'Verified' ? 'badge-success' : 'badge-warning'}">${c.kyc_status || 'Pending'}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${c.customer_type || '-'}</div>
+              <div class="badge ${c.kyc_status === 'Verified' ? 'badge-success' : c.kyc_status === 'Pending' ? 'badge-warning' : 'badge-info'}">${c.kyc_status || 'Pending'}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">${c.customer_type || '-'}</div>
+              <div style="font-size: 0.75rem; color: var(--accent-primary); margin-top: 0.25rem;">
+                <i class="fas fa-external-link-alt"></i> View Details
+              </div>
             </div>
           </div>
         </div>
       `).join('');
+    }
+
+    function clearCustomerFilters() {
+      document.getElementById('customer-lookup-input').value = '';
+      document.getElementById('customer-filter-state').value = '';
+      document.getElementById('customer-filter-type').value = '';
+      document.getElementById('customer-filter-kyc').value = '';
+      document.getElementById('customer-lookup-results').innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-users"></i>
+          <p>Enter a search term or select filters to find customers</p>
+        </div>
+      `;
+    }
+
+    function populateStateFilter() {
+      if (!appData) return;
+      const states = [...new Set(appData.customers.map(c => c.state).filter(Boolean))].sort();
+      const select = document.getElementById('customer-filter-state');
+      if (select) {
+        states.forEach(state => {
+          const option = document.createElement('option');
+          option.value = state;
+          option.textContent = state;
+          select.appendChild(option);
+        });
+      }
+    }
+
+    // Customer Detail Modal
+    let currentCustomer = null;
+    let customerTabActive = 'details';
+
+    function showCustomerDetail(customerId) {
+      if (!appData) return;
+      
+      currentCustomer = SheetsAPI.getCustomerDetails(
+        customerId, 
+        appData.customers, 
+        appData.transactions, 
+        appData.loans
+      );
+      
+      if (!currentCustomer) {
+        Utils.showToast('Customer not found', 'error');
+        return;
+      }
+
+      customerTabActive = 'details';
+      renderCustomerDetailModal();
+      App.showModal('customer-detail-modal');
+    }
+
+    function renderCustomerDetailModal() {
+      const c = currentCustomer;
+      const fullName = `${c.first_name || ''} ${c.middle_name || ''} ${c.last_name || ''}`.trim();
+      
+      document.getElementById('customer-detail-content').innerHTML = `
+        <!-- Customer Header -->
+        <div class="customer-profile-header">
+          <div class="customer-avatar-large">${Utils.getInitials(fullName)}</div>
+          <div class="customer-header-info">
+            <div class="customer-header-name">${fullName}</div>
+            <div class="customer-header-meta">
+              <span><i class="fas fa-phone"></i> ${c.phone_number || '-'}</span>
+              <span><i class="fas fa-envelope"></i> ${c.email || '-'}</span>
+              <span><i class="fas fa-wallet"></i> ${c.account_number || c.customer_id}</span>
+            </div>
+            <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <span class="badge ${c.kyc_status === 'Verified' ? 'badge-success' : c.kyc_status === 'Pending' ? 'badge-warning' : 'badge-info'}">${c.kyc_status || 'Pending'}</span>
+              <span class="badge badge-info">${c.customer_type || 'Individual'}</span>
+              <span class="badge badge-purple">${c.account_type || 'Savings'}</span>
+            </div>
+          </div>
+          <div class="customer-quick-stats">
+            <div class="customer-quick-stat">
+              <div class="customer-quick-stat-value">${c.totalTransactions}</div>
+              <div class="customer-quick-stat-label">Transactions</div>
+            </div>
+            <div class="customer-quick-stat">
+              <div class="customer-quick-stat-value">${c.totalLoans}</div>
+              <div class="customer-quick-stat-label">Loans</div>
+            </div>
+            <div class="customer-quick-stat">
+              <div class="customer-quick-stat-value">${Utils.formatCurrency(c.outstandingBalance).replace('NGN', '₦')}</div>
+              <div class="customer-quick-stat-label">Outstanding</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="customer-tabs">
+          <button class="customer-tab ${customerTabActive === 'details' ? 'active' : ''}" onclick="switchCustomerTab('details')">
+            <i class="fas fa-user"></i> Details
+          </button>
+          <button class="customer-tab ${customerTabActive === 'transactions' ? 'active' : ''}" onclick="switchCustomerTab('transactions')">
+            <i class="fas fa-exchange-alt"></i> Transactions (${c.totalTransactions})
+          </button>
+          <button class="customer-tab ${customerTabActive === 'loans' ? 'active' : ''}" onclick="switchCustomerTab('loans')">
+            <i class="fas fa-hand-holding-usd"></i> Loans (${c.totalLoans})
+          </button>
+        </div>
+
+        <!-- Tab Content: Details -->
+        <div class="customer-tab-content ${customerTabActive === 'details' ? 'active' : ''}" id="tab-details">
+          <div class="customer-info-grid">
+            <div class="customer-info-item">
+              <div class="customer-info-label">Customer ID</div>
+              <div class="customer-info-value">${c.customer_id}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Registration Date</div>
+              <div class="customer-info-value">${Utils.formatDate(c.registration_date)}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Date of Birth</div>
+              <div class="customer-info-value">${Utils.formatDate(c.date_of_birth)}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Gender</div>
+              <div class="customer-info-value">${c.gender || '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Marital Status</div>
+              <div class="customer-info-value">${c.marital_status || '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">State of Origin</div>
+              <div class="customer-info-value">${c.state_of_origin || '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">State of Residence</div>
+              <div class="customer-info-value">${c.state_of_residence || c.state || '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">LGA of Origin</div>
+              <div class="customer-info-value">${c.lga_of_origin || '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Nationality</div>
+              <div class="customer-info-value">${c.nationality || 'Nigerian'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Employment Status</div>
+              <div class="customer-info-value">${c.employment_status || '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Employer</div>
+              <div class="customer-info-value">${c.employer_name || '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Monthly Income</div>
+              <div class="customer-info-value">${Utils.formatCurrency(c.monthly_income)}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">BVN</div>
+              <div class="customer-info-value">${c.bvn ? '****' + c.bvn.slice(-4) : '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">NIN</div>
+              <div class="customer-info-value">${c.nin ? '****' + c.nin.slice(-4) : '-'}</div>
+            </div>
+            <div class="customer-info-item">
+              <div class="customer-info-label">Branch</div>
+              <div class="customer-info-value">${c.account_opening_branch || '-'}</div>
+            </div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <div class="customer-info-item" style="width: 100%;">
+              <div class="customer-info-label">Residential Address</div>
+              <div class="customer-info-value">${c.residential_address || '-'}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Transactions -->
+        <div class="customer-tab-content ${customerTabActive === 'transactions' ? 'active' : ''}" id="tab-transactions">
+          ${renderCustomerTransactions()}
+        </div>
+
+        <!-- Tab Content: Loans -->
+        <div class="customer-tab-content ${customerTabActive === 'loans' ? 'active' : ''}" id="tab-loans">
+          ${renderCustomerLoans()}
+        </div>
+      `;
+    }
+
+    function switchCustomerTab(tab) {
+      customerTabActive = tab;
+      renderCustomerDetailModal();
+    }
+
+    function renderCustomerTransactions() {
+      const transactions = currentCustomer.transactions || [];
+      
+      if (transactions.length === 0) {
+        return `
+          <div class="no-data-state">
+            <i class="fas fa-exchange-alt"></i>
+            <p>No transactions found for this customer</p>
+          </div>
+        `;
+      }
+
+      // Get filter values
+      const typeFilter = document.getElementById('txn-type-filter')?.value || '';
+      const statusFilter = document.getElementById('txn-status-filter')?.value || '';
+
+      let filtered = transactions;
+      if (typeFilter) filtered = filtered.filter(t => t.transaction_type === typeFilter);
+      if (statusFilter) filtered = filtered.filter(t => t.transaction_status === statusFilter);
+
+      const txnTypes = [...new Set(transactions.map(t => t.transaction_type).filter(Boolean))];
+      const txnStatuses = [...new Set(transactions.map(t => t.transaction_status).filter(Boolean))];
+
+      return `
+        <div class="customer-data-filters">
+          <select id="txn-type-filter" class="form-select filter-input" onchange="applyTransactionFilters()">
+            <option value="">All Types</option>
+            ${txnTypes.map(t => `<option value="${t}" ${typeFilter === t ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>
+          <select id="txn-status-filter" class="form-select filter-input" onchange="applyTransactionFilters()">
+            <option value="">All Status</option>
+            ${txnStatuses.map(s => `<option value="${s}" ${statusFilter === s ? 'selected' : ''}>${s}</option>`).join('')}
+          </select>
+          <span style="color: var(--text-muted); font-size: 0.75rem; align-self: center;">
+            Showing ${filtered.length} of ${transactions.length}
+          </span>
+        </div>
+        <div class="customer-data-list">
+          ${filtered.slice(0, 50).map(t => {
+            const isCredit = t.transaction_type === 'Deposit' || t.transaction_type === 'Credit';
+            return `
+              <div class="customer-data-item">
+                <div class="customer-data-icon ${isCredit ? 'credit' : 'debit'}">
+                  <i class="fas fa-${isCredit ? 'arrow-down' : 'arrow-up'}"></i>
+                </div>
+                <div class="customer-data-info">
+                  <div class="customer-data-title">${t.transaction_type} - ${t.channel || 'N/A'}</div>
+                  <div class="customer-data-subtitle">
+                    ${Utils.formatDate(t.transaction_date, 'datetime')} • ${t.transaction_id}
+                  </div>
+                  ${t.narration ? `<div class="customer-data-subtitle" style="margin-top: 2px;">${t.narration}</div>` : ''}
+                </div>
+                <div>
+                  <div class="customer-data-amount ${isCredit ? 'credit' : 'debit'}">
+                    ${isCredit ? '+' : '-'}${Utils.formatCurrency(t.amount)}
+                  </div>
+                  <div class="customer-data-status">
+                    ${App.formatters.status(t.transaction_status)}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        ${filtered.length > 50 ? `<p style="text-align: center; color: var(--text-muted); margin-top: 1rem;">Showing first 50 transactions</p>` : ''}
+      `;
+    }
+
+    function applyTransactionFilters() {
+      document.getElementById('tab-transactions').innerHTML = renderCustomerTransactions();
+    }
+
+    function renderCustomerLoans() {
+      const loans = currentCustomer.loans || [];
+      
+      if (loans.length === 0) {
+        return `
+          <div class="no-data-state">
+            <i class="fas fa-hand-holding-usd"></i>
+            <p>No loans found for this customer</p>
+          </div>
+        `;
+      }
+
+      // Get filter value
+      const statusFilter = document.getElementById('loan-status-filter')?.value || '';
+      
+      let filtered = loans;
+      if (statusFilter) filtered = filtered.filter(l => l.loan_status === statusFilter);
+
+      const loanStatuses = [...new Set(loans.map(l => l.loan_status).filter(Boolean))];
+
+      return `
+        <div class="customer-data-filters">
+          <select id="loan-status-filter" class="form-select filter-input" onchange="applyLoanFilters()">
+            <option value="">All Status</option>
+            ${loanStatuses.map(s => `<option value="${s}" ${statusFilter === s ? 'selected' : ''}>${s}</option>`).join('')}
+          </select>
+          <span style="color: var(--text-muted); font-size: 0.75rem; align-self: center;">
+            Showing ${filtered.length} of ${loans.length}
+          </span>
+        </div>
+        <div class="customer-data-list">
+          ${filtered.map(l => `
+            <div class="customer-data-item">
+              <div class="customer-data-icon loan">
+                <i class="fas fa-file-invoice-dollar"></i>
+              </div>
+              <div class="customer-data-info">
+                <div class="customer-data-title">${l.loan_product} - ${l.loan_id}</div>
+                <div class="customer-data-subtitle">
+                  Disbursed: ${Utils.formatDate(l.disbursement_date)} • ${l.tenure_months} months @ ${l.interest_rate}%
+                </div>
+                <div class="customer-data-subtitle" style="margin-top: 2px;">
+                  Purpose: ${l.purpose || '-'} • Paid: ${l.installments_paid}/${l.installments_agreed} installments
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div class="customer-data-amount" style="color: var(--text-primary);">
+                  ${Utils.formatCurrency(l.loan_amount)}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--accent-warning); margin-top: 0.25rem;">
+                  Outstanding: ${Utils.formatCurrency(l.total_outstanding_balance)}
+                </div>
+                <div class="customer-data-status" style="margin-top: 0.25rem;">
+                  ${App.formatters.status(l.loan_status)}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function applyLoanFilters() {
+      document.getElementById('tab-loans').innerHTML = renderCustomerLoans();
+    }
+
+    function logComplaintForCustomer() {
+      if (!currentCustomer) return;
+      
+      App.hideModal('customer-detail-modal');
+      navigateToSection('new-complaint');
+      
+      // Pre-fill customer info
+      setTimeout(() => {
+        document.getElementById('customer-search-input').value = currentCustomer.account_number || currentCustomer.customer_id;
+        document.getElementById('customer-name').value = `${currentCustomer.first_name || ''} ${currentCustomer.last_name || ''}`.trim();
+        document.getElementById('customer-phone').value = currentCustomer.phone_number || '';
+      }, 100);
     }
 
     // Action modal handlers
