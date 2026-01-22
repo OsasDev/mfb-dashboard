@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CFO Dashboard - PayMFB</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/cfo.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">P</div>
+          <div>
+            <div class="logo-text">PayMFB</div>
+            <div class="logo-subtitle">Finance Portal</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Overview</div>
+          <div class="nav-item active" data-section="overview">
+            <i class="fas fa-chart-pie"></i>
+            <span>Financial Overview</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Analysis</div>
+          <div class="nav-item" data-section="revenue">
+            <i class="fas fa-dollar-sign"></i>
+            <span>Revenue Analysis</span>
+          </div>
+          <div class="nav-item" data-section="loans">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Loan Analysis</span>
+          </div>
+          <div class="nav-item" data-section="risk">
+            <i class="fas fa-shield-alt"></i>
+            <span>Risk Management</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar" data-testid="user-avatar">?</div>
+          <div class="user-details">
+            <div class="user-name" id="user-name" data-testid="user-name">Loading...</div>
+            <div class="user-role" id="user-role" data-testid="user-role">-</div>
+          </div>
+          <button class="logout-btn" id="logout-btn" data-testid="logout-btn" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div id="page-loader" class="loader" style="display: none;">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Overview Section -->
+      <section id="overview" class="dashboard-section">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" data-testid="page-title">Financial Dashboard</h1>
+            <p class="page-subtitle">Financial health and performance metrics</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" id="refresh-btn" data-testid="refresh-btn">
+              <i class="fas fa-sync-alt"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Financial Summary Cards -->
+        <div class="financial-summary" id="financial-summary" data-testid="financial-summary">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Risk Indicators -->
+        <div class="risk-grid" id="risk-grid" data-testid="risk-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Transaction Value Trend</h3>
+                <p class="card-subtitle">Daily transaction value (₦M)</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="revenueChart" data-testid="revenue-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Loan Disbursements</h3>
+                <p class="card-subtitle">Monthly disbursement trend</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="loanDisbursementChart" data-testid="loan-disbursement-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Collection Rate</h3>
+                <p class="card-subtitle">Loan repayment performance</p>
+              </div>
+            </div>
+            <div class="chart-container gauge-container">
+              <canvas id="collectionRateChart" data-testid="collection-rate-chart"></canvas>
+              <div class="gauge-value">
+                <div class="gauge-value-number" id="collectionRateValue" data-testid="collection-rate-value">0%</div>
+                <div class="gauge-value-label">Collection Rate</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">NPL Trend</h3>
+                <p class="card-subtitle">Non-Performing Loans ratio</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="nplTrendChart" data-testid="npl-trend-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Customer Income Distribution</h3>
+                <p class="card-subtitle">Monthly income brackets</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="incomeDistributionChart" data-testid="income-distribution-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Loan Products</h3>
+                <p class="card-subtitle">Distribution by product type</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="loanProductChart" data-testid="loan-product-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loan Summary -->
+        <div class="data-section">
+          <div class="section-header">
+            <h3 class="section-title"><i class="fas fa-file-invoice-dollar"></i> Portfolio Summary</h3>
+          </div>
+          <div class="section-content">
+            <div class="breakdown-grid" id="portfolio-breakdown" data-testid="portfolio-breakdown">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Revenue Section -->
+      <section id="revenue" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Revenue Analysis</h1>
+            <p class="page-subtitle">Transaction value and revenue metrics</p>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="revenue-stats" data-testid="revenue-stats">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Loans Section -->
+      <section id="loans" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Loan Analysis</h1>
+            <p class="page-subtitle">Detailed loan portfolio analysis</p>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="loan-analysis-stats" data-testid="loan-analysis-stats">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="data-section">
+          <div class="section-header">
+            <h3 class="section-title"><i class="fas fa-clock"></i> Aging Report</h3>
+          </div>
+          <div class="section-content">
+            <div id="aging-report" data-testid="aging-report">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Risk Section -->
+      <section id="risk" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Risk Management</h1>
+            <p class="page-subtitle">Portfolio risk assessment</p>
+          </div>
+        </div>
+
+        <div id="risk-content" data-testid="risk-content">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sheets-api.js"></script>
+  <script src="../js/complaints.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/cfo-charts.js"></script>
+  <script>
+    let appData = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const initialized = await App.initDashboard(['CFO']);
+      if (!initialized) return;
+
+      CFOCharts.init();
+
+      appData = await App.loadData();
+      if (appData) {
+        renderDashboard(appData);
+        CFOCharts.updateCharts(appData);
+      }
+
+      setupNavigation();
+
+      document.getElementById('refresh-btn').addEventListener('click', async () => {
+        appData = await App.refreshData();
+        if (appData) {
+          renderDashboard(appData);
+          CFOCharts.updateCharts(appData);
+        }
+      });
+    });
+
+    function setupNavigation() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const section = this.dataset.section;
+          if (!section) return;
+
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+
+          document.querySelectorAll('.dashboard-section').forEach(s => {
+            s.style.display = s.id === section ? 'block' : 'none';
+          });
+
+          if (appData) {
+            renderSectionData(section, appData);
+          }
+        });
+      });
+    }
+
+    function renderDashboard(data) {
+      const { transactions, customers, loans } = data;
+      
+      const txnAnalytics = SheetsAPI.getTransactionAnalytics(transactions);
+      const custAnalytics = SheetsAPI.getCustomerAnalytics(customers);
+      const loanAnalytics = SheetsAPI.getLoanAnalytics(loans);
+
+      renderFinancialSummary(txnAnalytics, loanAnalytics);
+      renderRiskIndicators(loanAnalytics);
+      renderPortfolioBreakdown(loanAnalytics);
+    }
+
+    function renderFinancialSummary(txn, loan) {
+      const cards = [
+        {
+          icon: 'chart-line',
+          label: 'Total Transaction Value',
+          value: Utils.formatCurrency(txn.totalAmount),
+          color: '#00d4aa',
+          change: { value: 12.5, positive: true }
+        },
+        {
+          icon: 'hand-holding-usd',
+          label: 'Total Loans Disbursed',
+          value: Utils.formatCurrency(loan.totalDisbursed),
+          color: '#0ea5e9',
+          change: { value: 8.3, positive: true }
+        },
+        {
+          icon: 'coins',
+          label: 'Outstanding Balance',
+          value: Utils.formatCurrency(loan.totalOutstanding),
+          color: '#f59e0b',
+          change: { value: 3.2, positive: false }
+        },
+        {
+          icon: 'money-check-alt',
+          label: 'Total Collected',
+          value: Utils.formatCurrency(loan.totalCollected),
+          color: '#a855f7',
+          change: { value: 15.7, positive: true }
+        }
+      ];
+
+      document.getElementById('financial-summary').innerHTML = cards.map(card => `
+        <div class="finance-card" style="--card-accent: ${card.color}">
+          <div class="finance-header">
+            <div class="finance-icon" style="background: ${card.color}15; color: ${card.color}">
+              <i class="fas fa-${card.icon}"></i>
+            </div>
+          </div>
+          <div class="finance-label">${card.label}</div>
+          <div class="finance-value">${card.value}</div>
+          <div class="finance-change">
+            <span class="finance-change-badge ${card.change.positive ? 'positive' : 'negative'}">
+              <i class="fas fa-${card.change.positive ? 'arrow-up' : 'arrow-down'}"></i>
+              ${card.change.value}%
+            </span>
+            <span class="finance-change-text">vs last period</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderRiskIndicators(loan) {
+      const indicators = [
+        {
+          title: 'NPL Ratio',
+          value: Utils.formatPercent(loan.nplRatio),
+          subtitle: `${loan.nplCount} non-performing loans`,
+          level: loan.nplRatio <= 5 ? 'low' : loan.nplRatio <= 10 ? 'medium' : 'high'
+        },
+        {
+          title: 'Collection Rate',
+          value: Utils.formatPercent(loan.collectionRate),
+          subtitle: 'Repayment performance',
+          level: loan.collectionRate >= 90 ? 'low' : loan.collectionRate >= 75 ? 'medium' : 'high'
+        },
+        {
+          title: 'Overdue Loans',
+          value: Utils.formatNumber(loan.overdueCount),
+          subtitle: 'Requires attention',
+          level: loan.overdueCount <= 10 ? 'low' : loan.overdueCount <= 50 ? 'medium' : 'high'
+        }
+      ];
+
+      document.getElementById('risk-grid').innerHTML = indicators.map(ind => `
+        <div class="risk-card">
+          <div class="risk-indicator ${ind.level}"></div>
+          <div class="risk-content">
+            <div class="risk-title">${ind.title}</div>
+            <div class="risk-value">${ind.value}</div>
+            <div class="risk-subtitle">${ind.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderPortfolioBreakdown(loan) {
+      const items = [
+        {
+          title: 'Principal Outstanding',
+          value: Utils.formatCurrency(loan.totalOutstanding * 0.85),
+          percent: 85,
+          color: '#00d4aa'
+        },
+        {
+          title: 'Interest Outstanding',
+          value: Utils.formatCurrency(loan.totalOutstanding * 0.15),
+          percent: 15,
+          color: '#0ea5e9'
+        },
+        {
+          title: 'Average Loan Size',
+          value: Utils.formatCurrency(loan.avgLoanAmount),
+          percent: 100,
+          color: '#a855f7'
+        },
+        {
+          title: 'Average Interest Rate',
+          value: Utils.formatPercent(loan.avgInterestRate),
+          percent: loan.avgInterestRate * 5,
+          color: '#f59e0b'
+        }
+      ];
+
+      document.getElementById('portfolio-breakdown').innerHTML = items.map(item => `
+        <div class="breakdown-item">
+          <div class="breakdown-header">
+            <span class="breakdown-title">${item.title}</span>
+            <span class="breakdown-value">${item.value}</span>
+          </div>
+          <div class="breakdown-bar">
+            <div class="breakdown-progress" style="width: ${item.percent}%; background: ${item.color}"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderSectionData(section, data) {
+      const { transactions, customers, loans } = data;
+      const txn = SheetsAPI.getTransactionAnalytics(transactions);
+      const loan = SheetsAPI.getLoanAnalytics(loans);
+
+      if (section === 'revenue') {
+        const stats = [
+          { icon: 'chart-line', value: Utils.formatCurrency(txn.totalAmount), label: 'Total Value', color: '#00d4aa' },
+          { icon: 'calculator', value: Utils.formatCurrency(txn.averageAmount), label: 'Avg Transaction', color: '#0ea5e9' },
+          { icon: 'receipt', value: Utils.formatNumber(txn.total), label: 'Transactions', color: '#a855f7' },
+          { icon: 'check', value: Utils.formatPercent(txn.successRate), label: 'Success Rate', color: '#f59e0b' }
+        ];
+        App.renderStats('revenue-stats', stats);
+      } else if (section === 'loans') {
+        const stats = [
+          { icon: 'hand-holding-usd', value: Utils.formatCurrency(loan.totalDisbursed), label: 'Disbursed', color: '#00d4aa' },
+          { icon: 'coins', value: Utils.formatCurrency(loan.totalCollected), label: 'Collected', color: '#0ea5e9' },
+          { icon: 'percentage', value: Utils.formatPercent(loan.collectionRate), label: 'Collection', color: '#a855f7' },
+          { icon: 'calendar', value: loan.avgTenure.toFixed(0) + ' mo', label: 'Avg Tenure', color: '#f59e0b' }
+        ];
+        App.renderStats('loan-analysis-stats', stats);
+        
+        // Render aging report
+        renderAgingReport(loans);
+      } else if (section === 'risk') {
+        renderRiskContent(loan);
+      }
+    }
+
+    function renderAgingReport(loans) {
+      const aging = {
+        'Current': { count: 0, amount: 0 },
+        '1-30 Days': { count: 0, amount: 0 },
+        '31-60 Days': { count: 0, amount: 0 },
+        '61-90 Days': { count: 0, amount: 0 },
+        '90+ Days': { count: 0, amount: 0 }
+      };
+
+      const now = new Date();
+      loans.forEach(loan => {
+        if (loan.loan_status !== 'Active') return;
+        
+        const dueDate = new Date(loan.next_payment_due_date);
+        const daysOverdue = Math.floor((now - dueDate) / (1000 * 60 * 60 * 24));
+        
+        let bucket = 'Current';
+        if (daysOverdue > 90) bucket = '90+ Days';
+        else if (daysOverdue > 60) bucket = '61-90 Days';
+        else if (daysOverdue > 30) bucket = '31-60 Days';
+        else if (daysOverdue > 0) bucket = '1-30 Days';
+        
+        aging[bucket].count++;
+        aging[bucket].amount += loan.total_outstanding_balance;
+      });
+
+      document.getElementById('aging-report').innerHTML = `
+        <div class="aging-table">
+          <div class="aging-row header">
+            <span>Bucket</span>
+            <span style="text-align: right">Amount</span>
+            <span style="text-align: right">Count</span>
+          </div>
+          ${Object.entries(aging).map(([bucket, data]) => `
+            <div class="aging-row">
+              <span class="aging-bucket">${bucket}</span>
+              <span class="aging-amount">${Utils.formatCurrency(data.amount)}</span>
+              <span class="aging-count">${data.count}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderRiskContent(loan) {
+      document.getElementById('risk-content').innerHTML = `
+        <div class="stats-grid">
+          <div class="stat-card" style="--stat-color: ${loan.nplRatio <= 5 ? '#00d4aa' : '#ef4444'}">
+            <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="stat-value">${Utils.formatPercent(loan.nplRatio)}</div>
+            <div class="stat-label">NPL Ratio</div>
+          </div>
+          <div class="stat-card" style="--stat-color: #f59e0b">
+            <div class="stat-icon"><i class="fas fa-coins"></i></div>
+            <div class="stat-value">${Utils.formatCurrency(loan.nplAmount)}</div>
+            <div class="stat-label">NPL Amount</div>
+          </div>
+          <div class="stat-card" style="--stat-color: #ef4444">
+            <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+            <div class="stat-value">${loan.nplCount}</div>
+            <div class="stat-label">NPL Loans</div>
+          </div>
+          <div class="stat-card" style="--stat-color: #0ea5e9">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-value">${loan.overdueCount}</div>
+            <div class="stat-label">Overdue</div>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
