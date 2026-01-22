@@ -4,6 +4,7 @@
     "customers": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=1161555937&single=true&output=csv",
     "loans": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=317818925&single=true&output=csv"
   },
+  "backendUrl": "https://fintrack-hub-23.preview.emergentagent.com",
   "complaintCategories": [
     "Account Issues",
     "Card Issues",
