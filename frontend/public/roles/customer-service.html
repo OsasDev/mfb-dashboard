@@ -353,17 +353,50 @@
           </div>
         </div>
 
-        <div class="card" style="margin-bottom: 2rem;">
-          <div class="search-box" style="max-width: 400px;">
-            <i class="fas fa-search"></i>
-            <input type="text" id="customer-lookup-input" class="form-input" placeholder="Search by name, phone, or account number..." data-testid="customer-lookup-input">
+        <!-- Search and Filters -->
+        <div class="dashboard-filters">
+          <div class="filter-group" style="flex: 2;">
+            <label class="filter-label">Search</label>
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="customer-lookup-input" class="form-input filter-input" style="width: 100%;" placeholder="Name, phone, account, email..." data-testid="customer-lookup-input">
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">State</label>
+            <select id="customer-filter-state" class="form-select filter-input" data-testid="customer-filter-state">
+              <option value="">All States</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Customer Type</label>
+            <select id="customer-filter-type" class="form-select filter-input" data-testid="customer-filter-type">
+              <option value="">All Types</option>
+              <option value="Individual">Individual</option>
+              <option value="Business">Business</option>
+              <option value="Corporate">Corporate</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">KYC Status</label>
+            <select id="customer-filter-kyc" class="form-select filter-input" data-testid="customer-filter-kyc">
+              <option value="">All</option>
+              <option value="Verified">Verified</option>
+              <option value="Pending">Pending</option>
+              <option value="Incomplete">Incomplete</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-secondary filter-btn" onclick="clearCustomerFilters()" data-testid="clear-customer-filters">
+              <i class="fas fa-times"></i> Clear
+            </button>
           </div>
         </div>
 
         <div id="customer-lookup-results" data-testid="customer-lookup-results">
           <div class="empty-state">
-            <i class="fas fa-user-search"></i>
-            <p>Enter a search term to find customers</p>
+            <i class="fas fa-users"></i>
+            <p>Enter a search term or select filters to find customers</p>
           </div>
         </div>
       </section>
