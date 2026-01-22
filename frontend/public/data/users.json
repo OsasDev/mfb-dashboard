@@ -47,6 +47,38 @@
       "role": "CustomerService",
       "name": "Mustapha Onoja",
       "department": "Customer Service"
+    },
+    {
+      "id": "OPS001",
+      "email": "aisha.bello@paymfb.com",
+      "password": "0ps@2024PayMFB!",
+      "role": "Operations",
+      "name": "Aisha Bello",
+      "department": "Operations"
+    },
+    {
+      "id": "OPS002",
+      "email": "emeka.nwosu@paymfb.com",
+      "password": "0ps2@2024PayMFB",
+      "role": "Operations",
+      "name": "Emeka Nwosu",
+      "department": "Operations"
+    },
+    {
+      "id": "LR001",
+      "email": "funmi.adeyemi@paymfb.com",
+      "password": "LR@2024PayMFB!",
+      "role": "LoanRecovery",
+      "name": "Funmi Adeyemi",
+      "department": "Loan Recovery"
+    },
+    {
+      "id": "LR002",
+      "email": "ibrahim.yusuf@paymfb.com",
+      "password": "LR2@2024PayMFB",
+      "role": "LoanRecovery",
+      "name": "Ibrahim Yusuf",
+      "department": "Loan Recovery"
     }
   ]
 }
