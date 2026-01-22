@@ -879,7 +879,7 @@
       return actions;
     }
 
-    function handleCreateComplaint(e) {
+    async function handleCreateComplaint(e) {
       e.preventDefault();
 
       const formData = {
@@ -896,21 +896,26 @@
 
       const assignTo = document.getElementById('assign-to').value;
       
-      const complaint = Complaints.create(formData);
+      try {
+        const complaint = await Complaints.create(formData);
 
-      if (assignTo) {
-        const staff = Auth.getCustomerServiceStaff().find(s => s.id === assignTo);
-        if (staff) {
-          Complaints.assign(complaint.id, staff.id, staff.name);
+        if (assignTo && complaint) {
+          const staff = Auth.getCustomerServiceStaff().find(s => s.id === assignTo);
+          if (staff) {
+            await Complaints.assign(complaint.id, staff.id, staff.name);
+          }
         }
-      }
 
-      Utils.showToast(`Complaint ${complaint.ticketNumber} created successfully`, 'success');
-      document.getElementById('complaint-form').reset();
-      document.getElementById('customer-search-result').classList.remove('show');
-      
-      renderDashboard();
-      navigateToSection('complaints');
+        Utils.showToast(`Complaint ${complaint.ticketNumber} created successfully`, 'success');
+        document.getElementById('complaint-form').reset();
+        document.getElementById('customer-search-result').classList.remove('show');
+        
+        renderDashboard();
+        navigateToSection('complaints');
+      } catch (error) {
+        console.error('Error creating complaint:', error);
+        Utils.showToast('Failed to create complaint', 'error');
+      }
     }
 
     async function handleCustomerSearch(e) {
