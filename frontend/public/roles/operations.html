@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operations Dashboard - PayMFB</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/customer-service.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">P</div>
+          <div>
+            <div class="logo-text">PayMFB</div>
+            <div class="logo-subtitle">Operations</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Dashboard</div>
+          <div class="nav-item active" data-section="overview">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Overview</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Escalations</div>
+          <div class="nav-item" data-section="escalations">
+            <i class="fas fa-arrow-up"></i>
+            <span>All Escalations</span>
+          </div>
+          <div class="nav-item" data-section="my-escalations">
+            <i class="fas fa-user-clock"></i>
+            <span>My Assignments</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Analytics</div>
+          <div class="nav-item" data-section="performance">
+            <i class="fas fa-chart-bar"></i>
+            <span>Performance</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar" data-testid="user-avatar">?</div>
+          <div class="user-details">
+            <div class="user-name" id="user-name" data-testid="user-name">Loading...</div>
+            <div class="user-role" id="user-role" data-testid="user-role">-</div>
+          </div>
+          <button class="logout-btn" id="logout-btn" data-testid="logout-btn" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div id="page-loader" class="loader" style="display: none;">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Overview Section -->
+      <section id="overview" class="dashboard-section">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" data-testid="page-title">Operations Dashboard</h1>
+            <p class="page-subtitle">Escalated complaints and operational oversight</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" id="refresh-btn" data-testid="refresh-btn">
+              <i class="fas fa-sync-alt"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="service-summary" id="ops-summary" data-testid="ops-summary">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Escalations Trend</h3>
+                <p class="card-subtitle">Last 14 days</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="escalationsTrendChart" data-testid="escalations-trend-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Resolution Rate</h3>
+                <p class="card-subtitle">Escalation outcomes</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="resolutionRateChart" data-testid="resolution-rate-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Escalations -->
+        <div class="data-section">
+          <div class="section-header">
+            <h3 class="section-title"><i class="fas fa-arrow-up"></i> Recent Escalations</h3>
+            <button class="btn btn-secondary btn-sm" onclick="navigateToSection('escalations')">
+              View All
+            </button>
+          </div>
+          <div class="section-content">
+            <div id="recent-escalations" data-testid="recent-escalations">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- All Escalations Section -->
+      <section id="escalations" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">All Escalations</h1>
+            <p class="page-subtitle">Manage escalated complaints from customer service</p>
+          </div>
+          <div class="header-actions">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="escalation-search" class="form-input" placeholder="Search escalations..." data-testid="escalation-search">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs" id="escalation-filter" data-testid="escalation-filter">
+          <button class="filter-tab active" data-status="all">All <span class="count" id="count-all">0</span></button>
+          <button class="filter-tab" data-status="Escalated">Pending <span class="count" id="count-pending">0</span></button>
+          <button class="filter-tab" data-status="In Progress">In Progress <span class="count" id="count-progress">0</span></button>
+          <button class="filter-tab" data-status="Resolved">Resolved <span class="count" id="count-resolved">0</span></button>
+        </div>
+
+        <!-- Escalations List -->
+        <div id="escalations-list" data-testid="escalations-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- My Escalations Section -->
+      <section id="my-escalations" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">My Assignments</h1>
+            <p class="page-subtitle">Escalations assigned to you</p>
+          </div>
+        </div>
+
+        <div id="my-escalations-list" data-testid="my-escalations-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Performance Section -->
+      <section id="performance" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Performance Metrics</h1>
+            <p class="page-subtitle">Operational performance indicators</p>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="performance-stats" data-testid="performance-stats">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Complaint Detail Modal -->
+  <div class="modal-overlay" id="complaint-detail-modal" data-testid="complaint-detail-modal">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Escalation Details</h2>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="complaint-detail-content" data-testid="complaint-detail-content">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer" id="complaint-detail-actions" data-testid="complaint-detail-actions">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Modal -->
+  <div class="modal-overlay" id="action-modal" data-testid="action-modal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="action-modal-title">Action</h2>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="action-modal-content" data-testid="action-modal-content">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="App.hideModal('action-modal')">Cancel</button>
+        <button class="btn btn-primary" id="action-modal-submit" data-testid="action-modal-submit">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sheets-api.js"></script>
+  <script src="../js/complaints.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let appData = null;
+    let currentComplaint = null;
+    let currentFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const initialized = await App.initDashboard(['Operations', 'CEO', 'COO']);
+      if (!initialized) return;
+
+      await Complaints.init();
+      appData = await App.loadData();
+      
+      renderDashboard();
+      setupNavigation();
+      setupEventListeners();
+      App.setupModals();
+    });
+
+    function setupNavigation() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const section = this.dataset.section;
+          navigateToSection(section);
+        });
+      });
+    }
+
+    function navigateToSection(section) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
+
+      document.querySelectorAll('.dashboard-section').forEach(s => {
+        s.style.display = s.id === section ? 'block' : 'none';
+      });
+
+      if (section === 'escalations') {
+        renderEscalationsList(currentFilter);
+      } else if (section === 'my-escalations') {
+        renderMyEscalations();
+      } else if (section === 'performance') {
+        renderPerformanceStats();
+      }
+    }
+
+    function setupEventListeners() {
+      // Refresh button
+      document.getElementById('refresh-btn').addEventListener('click', async () => {
+        await Complaints.init();
+        renderDashboard();
+        Utils.showToast('Data refreshed', 'success');
+      });
+
+      // Filter tabs
+      document.querySelectorAll('#escalation-filter .filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('#escalation-filter .filter-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.status;
+          renderEscalationsList(currentFilter);
+        });
+      });
+
+      // Search
+      document.getElementById('escalation-search').addEventListener('input', Utils.debounce((e) => {
+        const query = e.target.value.toLowerCase();
+        if (query.length >= 2) {
+          const escalations = getEscalations().filter(c =>
+            c.ticketNumber.toLowerCase().includes(query) ||
+            c.customerName?.toLowerCase().includes(query) ||
+            c.description?.toLowerCase().includes(query)
+          );
+          renderEscalationCards(escalations, 'escalations-list');
+        } else {
+          renderEscalationsList(currentFilter);
+        }
+      }, 300));
+    }
+
+    function getEscalations() {
+      // Get complaints that were escalated to Operations
+      return Complaints.getAll().filter(c => 
+        c.status === 'Escalated' || 
+        c.escalatedTo === 'Operations Team' ||
+        c.escalatedTo === 'operations'
+      );
+    }
+
+    function renderDashboard() {
+      const escalations = getEscalations();
+      const analytics = getEscalationAnalytics(escalations);
+      
+      renderSummaryStats(analytics);
+      renderCharts(analytics);
+      renderRecentEscalations(escalations.slice(0, 5));
+      updateFilterCounts(analytics);
+    }
+
+    function getEscalationAnalytics(escalations) {
+      const total = escalations.length;
+      const pending = escalations.filter(e => e.status === 'Escalated').length;
+      const inProgress = escalations.filter(e => e.status === 'In Progress').length;
+      const resolved = escalations.filter(e => e.status === 'Resolved' || e.status === 'Closed').length;
+      
+      // Daily trends
+      const dailyTrends = {};
+      escalations.forEach(e => {
+        const date = e.createdAt?.split('T')[0] || 'Unknown';
+        dailyTrends[date] = (dailyTrends[date] || 0) + 1;
+      });
+
+      // By category
+      const byCategory = {};
+      escalations.forEach(e => {
+        byCategory[e.category] = (byCategory[e.category] || 0) + 1;
+      });
+
+      return {
+        total,
+        pending,
+        inProgress,
+        resolved,
+        resolutionRate: total ? (resolved / total) * 100 : 0,
+        dailyTrends,
+        byCategory
+      };
+    }
+
+    function renderSummaryStats(analytics) {
+      const stats = [
+        { icon: 'arrow-up', value: analytics.total, label: 'Total Escalations', color: '#7c3aed', bgColor: 'rgba(124, 58, 237, 0.15)' },
+        { icon: 'clock', value: analytics.pending, label: 'Pending', color: '#d97706', bgColor: 'rgba(217, 119, 6, 0.15)' },
+        { icon: 'spinner', value: analytics.inProgress, label: 'In Progress', color: '#0284c7', bgColor: 'rgba(2, 132, 199, 0.15)' },
+        { icon: 'check-circle', value: analytics.resolved, label: 'Resolved', color: '#059669', bgColor: 'rgba(5, 150, 105, 0.15)' },
+        { icon: 'percentage', value: Utils.formatPercent(analytics.resolutionRate), label: 'Resolution Rate', color: '#059669', bgColor: 'rgba(5, 150, 105, 0.15)' }
+      ];
+
+      document.getElementById('ops-summary').innerHTML = stats.map(stat => `
+        <div class="service-stat">
+          <div class="service-stat-icon" style="background: ${stat.bgColor}; color: ${stat.color}">
+            <i class="fas fa-${stat.icon}"></i>
+          </div>
+          <div class="service-stat-value">${stat.value}</div>
+          <div class="service-stat-label">${stat.label}</div>
+        </div>
+      `).join('');
+    }
+
+    function updateFilterCounts(analytics) {
+      document.getElementById('count-all').textContent = analytics.total;
+      document.getElementById('count-pending').textContent = analytics.pending;
+      document.getElementById('count-progress').textContent = analytics.inProgress;
+      document.getElementById('count-resolved').textContent = analytics.resolved;
+    }
+
+    let trendChart = null;
+    let resolutionChart = null;
+
+    function renderCharts(analytics) {
+      // Escalations Trend Chart
+      const trendCtx = document.getElementById('escalationsTrendChart').getContext('2d');
+      const dates = Object.keys(analytics.dailyTrends).sort().slice(-14);
+      const counts = dates.map(d => analytics.dailyTrends[d]);
+
+      if (trendChart) trendChart.destroy();
+      trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: dates.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+          datasets: [{
+            label: 'Escalations',
+            data: counts,
+            borderColor: '#7c3aed',
+            backgroundColor: 'rgba(124, 58, 237, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+
+      // Resolution Rate Chart
+      const resCtx = document.getElementById('resolutionRateChart').getContext('2d');
+      if (resolutionChart) resolutionChart.destroy();
+      resolutionChart = new Chart(resCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Resolved', 'Pending', 'In Progress'],
+          datasets: [{
+            data: [analytics.resolved, analytics.pending, analytics.inProgress],
+            backgroundColor: ['#059669', '#d97706', '#0284c7'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+
+    function renderRecentEscalations(escalations) {
+      renderEscalationCards(escalations, 'recent-escalations');
+    }
+
+    function renderEscalationsList(status = 'all') {
+      let escalations = getEscalations();
+      if (status !== 'all') {
+        escalations = escalations.filter(e => e.status === status);
+      }
+      renderEscalationCards(escalations, 'escalations-list');
+    }
+
+    function renderMyEscalations() {
+      const user = Auth.getCurrentUser();
+      const escalations = getEscalations().filter(e => e.assignedTo === user.id);
+      renderEscalationCards(escalations, 'my-escalations-list');
+    }
+
+    function renderEscalationCards(escalations, containerId) {
+      const container = document.getElementById(containerId);
+      
+      if (!escalations || escalations.length === 0) {
+        container.innerHTML = `
+          <div class="complaints-empty">
+            <i class="fas fa-inbox complaints-empty-icon"></i>
+            <div class="complaints-empty-title">No escalations found</div>
+            <div class="complaints-empty-text">There are no escalations matching your criteria</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = escalations.map(c => {
+        const slaStatus = Complaints.getSLAStatus(c);
+        const slaClass = slaStatus.toLowerCase().replace(' ', '-');
+        
+        return `
+          <div class="complaint-card priority-${c.priority.toLowerCase()}" onclick="showEscalationDetail('${c.id}')" data-testid="escalation-card-${c.id}">
+            <div class="complaint-header">
+              <span class="complaint-ticket">${c.ticketNumber}</span>
+              <span class="complaint-time">${Utils.formatRelativeTime(c.createdAt)}</span>
+            </div>
+            <div class="complaint-customer">${c.customerName || 'Unknown Customer'}</div>
+            <div class="complaint-category">${c.category} • ${c.subject || 'No subject'}</div>
+            <div class="complaint-description">${c.escalationReason || c.description || 'No description'}</div>
+            <div class="complaint-footer">
+              <div class="complaint-assignee">
+                ${c.assignedToName ? `
+                  <div class="complaint-assignee-avatar">${Utils.getInitials(c.assignedToName)}</div>
+                  <span>${c.assignedToName}</span>
+                ` : '<span style="color: var(--text-muted)">Unassigned</span>'}
+              </div>
+              <div class="complaint-sla ${slaClass}">
+                <span class="sla-dot"></span>
+                <span>${slaStatus}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showEscalationDetail(id) {
+      currentComplaint = Complaints.getById(id);
+      if (!currentComplaint) return;
+
+      const slaStatus = Complaints.getSLAStatus(currentComplaint);
+
+      document.getElementById('complaint-detail-content').innerHTML = `
+        <div class="complaint-detail-header">
+          <div class="complaint-detail-info">
+            <div class="complaint-detail-ticket">${currentComplaint.ticketNumber}</div>
+            <div class="complaint-detail-badges">
+              ${App.formatters.status(currentComplaint.status)}
+              ${App.formatters.priority(currentComplaint.priority)}
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Customer Information</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Name</span>
+              <span class="detail-value">${currentComplaint.customerName || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Phone</span>
+              <span class="detail-value">${currentComplaint.customerPhone || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Account Number</span>
+              <span class="detail-value">${currentComplaint.customerAccountNumber || '-'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Escalation Details</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Category</span>
+              <span class="detail-value">${currentComplaint.category}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Escalated To</span>
+              <span class="detail-value">${currentComplaint.escalatedTo || '-'}</span>
+            </div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <span class="detail-label">Escalation Reason</span>
+            <div class="detail-description" style="margin-top: 0.5rem;">${currentComplaint.escalationReason || 'No reason provided'}</div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <span class="detail-label">Original Description</span>
+            <div class="detail-description" style="margin-top: 0.5rem;">${currentComplaint.description || '-'}</div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">History</div>
+          <div class="history-timeline">
+            ${currentComplaint.history.map(h => `
+              <div class="history-item ${h.action.toLowerCase().replace(' ', '-')}">
+                <div class="history-action">${h.action}</div>
+                <div class="history-details">${h.details}</div>
+                <div class="history-meta">${h.user} • ${Utils.formatDate(h.timestamp, 'datetime')}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      // Render action buttons
+      const actions = [];
+      if (currentComplaint.status === 'Escalated') {
+        actions.push({ icon: 'play', label: 'Start Working', onclick: 'startWorking()', testId: 'start-btn' });
+        actions.push({ icon: 'user-check', label: 'Assign', onclick: 'showAssignModal()', testId: 'assign-btn' });
+      }
+      if (currentComplaint.status === 'In Progress') {
+        actions.push({ icon: 'check', label: 'Resolve', onclick: 'showResolveModal()', class: 'primary', testId: 'resolve-btn' });
+        actions.push({ icon: 'sticky-note', label: 'Add Note', onclick: 'showAddNoteModal()', testId: 'note-btn' });
+      }
+
+      document.getElementById('complaint-detail-actions').innerHTML = `
+        <div class="action-buttons">
+          ${actions.map(a => `
+            <button class="action-btn ${a.class || ''}" onclick="${a.onclick}" data-testid="${a.testId}">
+              <i class="fas fa-${a.icon}"></i>
+              ${a.label}
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      App.showModal('complaint-detail-modal');
+    }
+
+    function startWorking() {
+      const user = Auth.getCurrentUser();
+      Complaints.assign(currentComplaint.id, user.id, user.name);
+      Complaints.update(currentComplaint.id, { status: 'In Progress' });
+      Utils.showToast('You are now working on this escalation', 'success');
+      App.hideModal('complaint-detail-modal');
+      renderDashboard();
+    }
+
+    function showAssignModal() {
+      App.hideModal('complaint-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Assign Escalation';
+      
+      const staff = Auth.getOperationsStaff();
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Assign To</label>
+          <select id="assign-staff" class="form-select" data-testid="assign-staff-select">
+            ${staff.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+          </select>
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const staffId = document.getElementById('assign-staff').value;
+        const staffName = staff.find(s => s.id === staffId)?.name;
+        Complaints.assign(currentComplaint.id, staffId, staffName);
+        Utils.showToast('Escalation assigned successfully', 'success');
+        App.hideModal('action-modal');
+        renderDashboard();
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function showResolveModal() {
+      App.hideModal('complaint-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Resolve Escalation';
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Resolution *</label>
+          <textarea id="resolution-text" class="form-textarea" placeholder="Describe how the issue was resolved..." required data-testid="resolution-textarea"></textarea>
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const resolution = document.getElementById('resolution-text').value;
+        if (!resolution) {
+          Utils.showToast('Please enter a resolution', 'error');
+          return;
+        }
+        Complaints.resolve(currentComplaint.id, resolution);
+        Utils.showToast('Escalation resolved successfully', 'success');
+        App.hideModal('action-modal');
+        renderDashboard();
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function showAddNoteModal() {
+      App.hideModal('complaint-detail-modal');
+      document.getElementById('action-modal-title').textContent = 'Add Note';
+      document.getElementById('action-modal-content').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Note *</label>
+          <textarea id="note-text" class="form-textarea" placeholder="Enter your note..." required data-testid="note-textarea"></textarea>
+        </div>
+      `;
+
+      document.getElementById('action-modal-submit').onclick = () => {
+        const note = document.getElementById('note-text').value;
+        if (!note) {
+          Utils.showToast('Please enter a note', 'error');
+          return;
+        }
+        Complaints.addNote(currentComplaint.id, note);
+        Utils.showToast('Note added successfully', 'success');
+        App.hideModal('action-modal');
+        renderDashboard();
+      };
+
+      App.showModal('action-modal');
+    }
+
+    function renderPerformanceStats() {
+      const escalations = getEscalations();
+      const resolved = escalations.filter(e => e.status === 'Resolved' || e.status === 'Closed');
+      
+      // Calculate average resolution time
+      let avgTime = 0;
+      if (resolved.length > 0) {
+        const totalTime = resolved.reduce((sum, e) => {
+          if (e.resolvedAt) {
+            return sum + (new Date(e.resolvedAt) - new Date(e.createdAt));
+          }
+          return sum;
+        }, 0);
+        avgTime = totalTime / resolved.length / (1000 * 60 * 60); // Hours
+      }
+
+      const stats = [
+        { icon: 'arrow-up', value: escalations.length, label: 'Total Escalations', color: '#7c3aed' },
+        { icon: 'check-circle', value: resolved.length, label: 'Resolved', color: '#059669' },
+        { icon: 'clock', value: Utils.formatNumber(avgTime, 1) + 'h', label: 'Avg Resolution Time', color: '#0284c7' },
+        { icon: 'percentage', value: Utils.formatPercent(escalations.length ? (resolved.length / escalations.length) * 100 : 0), label: 'Resolution Rate', color: '#059669' }
+      ];
+
+      App.renderStats('performance-stats', stats);
+    }
+  </script>
+</body>
+</html>
