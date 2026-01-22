@@ -266,6 +266,7 @@
   <script src="../js/sheets-api.js"></script>
   <script src="../js/complaints.js"></script>
   <script src="../js/app.js"></script>
+  <script src="../js/export.js"></script>
   <script src="../js/cfo-charts.js"></script>
   <script>
     let appData = null;
@@ -283,6 +284,7 @@
       }
 
       setupNavigation();
+      setupExportDropdown();
 
       document.getElementById('refresh-btn').addEventListener('click', async () => {
         appData = await App.refreshData();
@@ -292,6 +294,86 @@
         }
       });
     });
+
+    // Export dropdown toggle
+    function setupExportDropdown() {
+      const exportBtn = document.getElementById('export-btn');
+      const exportMenu = document.getElementById('export-menu');
+      
+      exportBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exportMenu.style.display = exportMenu.style.display === 'none' ? 'block' : 'none';
+      });
+
+      document.addEventListener('click', () => {
+        exportMenu.style.display = 'none';
+      });
+
+      document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('mouseenter', () => {
+          item.style.background = 'var(--bg-hover)';
+          item.style.color = 'var(--text-primary)';
+        });
+        item.addEventListener('mouseleave', () => {
+          item.style.background = 'transparent';
+          item.style.color = 'var(--text-secondary)';
+        });
+      });
+    }
+
+    function exportLoansCSV() {
+      if (!appData) return;
+      const data = ExportUtils.prepareLoansExport(appData.loans);
+      ExportUtils.toCSV(data, 'PayMFB_Loans_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportLoansExcel() {
+      if (!appData) return;
+      const data = ExportUtils.prepareLoansExport(appData.loans);
+      ExportUtils.toExcel(data, 'PayMFB_Loans_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportFinancialReportPDF() {
+      if (!appData) return;
+      
+      const txn = SheetsAPI.getTransactionAnalytics(appData.transactions);
+      const loan = SheetsAPI.getLoanAnalytics(appData.loans);
+
+      const analytics = {
+        sections: [
+          {
+            title: 'Financial Overview',
+            metrics: [
+              { label: 'Total Transaction Value', value: Utils.formatCurrency(txn.totalAmount) },
+              { label: 'Total Loans Disbursed', value: Utils.formatCurrency(loan.totalDisbursed) },
+              { label: 'Outstanding Balance', value: Utils.formatCurrency(loan.totalOutstanding) },
+              { label: 'Total Collected', value: Utils.formatCurrency(loan.totalCollected) }
+            ]
+          },
+          {
+            title: 'Risk Indicators',
+            metrics: [
+              { label: 'NPL Ratio', value: Utils.formatPercent(loan.nplRatio) },
+              { label: 'NPL Amount', value: Utils.formatCurrency(loan.nplAmount) },
+              { label: 'Collection Rate', value: Utils.formatPercent(loan.collectionRate) },
+              { label: 'Overdue Loans', value: loan.overdueCount.toString() }
+            ]
+          },
+          {
+            title: 'Loan Portfolio by Status',
+            breakdown: loan.byStatus,
+            breakdownLabel: 'Status'
+          },
+          {
+            title: 'Loan Products',
+            breakdown: loan.byProduct,
+            breakdownLabel: 'Product'
+          }
+        ]
+      };
+
+      ExportUtils.toAnalyticsPDF(analytics, 'CFO Financial Report');
+    }
 
     function setupNavigation() {
       document.querySelectorAll('.nav-item').forEach(item => {
