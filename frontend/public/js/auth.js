@@ -52,7 +52,7 @@ const Auth = {
   logout() {
     this.currentUser = null;
     Utils.storage.remove('mfb_user');
-    window.location.href = 'login.html';
+    window.location.href = '/login.html';
   },
 
   // Check if logged in
