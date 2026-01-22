@@ -216,6 +216,7 @@ test_plan:
     - "Add Transaction Analytics section to Operations Dashboard"
     - "Enhance CEO/COO Dashboard with Route Analytics"
     - "Add Route Analytics to CFO Dashboard"
+    - "Add Customer Information to Loan Recovery Portal - Overdue Loans"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
