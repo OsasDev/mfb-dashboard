@@ -1,0 +1,52 @@
+{
+  "users": [
+    {
+      "id": "CEO001",
+      "email": "ceo@paymfb.com",
+      "password": "CE0@2024PayMFB!",
+      "role": "CEO",
+      "name": "Chief Executive Officer",
+      "department": "Executive"
+    },
+    {
+      "id": "COO001", 
+      "email": "adenike.funke@paymfb.com",
+      "password": "C00@2024MFBP@y",
+      "role": "COO",
+      "name": "Adenike Funke",
+      "department": "Operations"
+    },
+    {
+      "id": "CFO001",
+      "email": "ruth.prayer@paymfb.com",
+      "password": "CF0$2024PayMFB",
+      "role": "CFO",
+      "name": "Ruth Prayer",
+      "department": "Finance"
+    },
+    {
+      "id": "CS001",
+      "email": "tolu.aduragba@paymfb.com",
+      "password": "CServ1ce@MFB2024",
+      "role": "CustomerService",
+      "name": "Tolu Aduragba",
+      "department": "Customer Service"
+    },
+    {
+      "id": "CS002",
+      "email": "chinedu.abah@paymfb.com",
+      "password": "CServ2ce@MFB2024",
+      "role": "CustomerService",
+      "name": "Chinedu Abah",
+      "department": "Customer Service"
+    },
+    {
+      "id": "CS003",
+      "email": "mustapha.onoja@paymfb.com",
+      "password": "CServ3ce@MFB2024",
+      "role": "CustomerService",
+      "name": "Mustapha Onoja",
+      "department": "Customer Service"
+    }
+  ]
+}
