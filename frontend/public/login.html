@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - PayMFB Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-primary);
+      padding: 2rem;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .login-logo {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--bg-primary);
+      margin: 0 auto 1.5rem;
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+      transition: var(--transition);
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+    }
+
+    .input-group input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    .password-toggle:hover {
+      color: var(--text-primary);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--accent-primary);
+      color: var(--bg-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .login-btn:hover {
+      background: #00b894;
+      transform: translateY(-1px);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--accent-danger);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      color: var(--accent-danger);
+      font-size: 0.875rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .login-error.show {
+      display: flex;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .demo-accounts {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+    }
+
+    .demo-accounts-title {
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .demo-account {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .demo-account:last-child {
+      border-bottom: none;
+    }
+
+    .demo-account-role {
+      color: var(--accent-primary);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">P</div>
+        <h1 class="login-title">PayMFB Dashboard</h1>
+        <p class="login-subtitle">Strategic Insights & Customer Service Portal</p>
+      </div>
+
+      <form class="login-form" id="login-form" data-testid="login-form">
+        <div class="login-error" id="login-error" data-testid="login-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="error-message">Invalid email or password</span>
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input 
+            type="email" 
+            id="email" 
+            name="email"
+            placeholder="Email address" 
+            required
+            autocomplete="email"
+            data-testid="email-input"
+          >
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input 
+            type="password" 
+            id="password" 
+            name="password"
+            placeholder="Password" 
+            required
+            autocomplete="current-password"
+            data-testid="password-input"
+          >
+          <button type="button" class="password-toggle" id="password-toggle" data-testid="password-toggle">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+
+        <button type="submit" class="login-btn" id="login-btn" data-testid="login-button">
+          <span>Sign In</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <div class="demo-accounts">
+        <div class="demo-accounts-title">Demo Accounts</div>
+        <div class="demo-account">
+          <span class="demo-account-role">CEO</span>
+          <span>ceo@paymfb.com</span>
+        </div>
+        <div class="demo-account">
+          <span class="demo-account-role">COO</span>
+          <span>adenike.funke@paymfb.com</span>
+        </div>
+        <div class="demo-account">
+          <span class="demo-account-role">CFO</span>
+          <span>ruth.prayer@paymfb.com</span>
+        </div>
+        <div class="demo-account">
+          <span class="demo-account-role">Customer Service</span>
+          <span>tolu.aduragba@paymfb.com</span>
+        </div>
+      </div>
+
+      <div class="login-footer">
+        &copy; 2024 PayMFB. All rights reserved.
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Initialize auth
+      const isLoggedIn = await Auth.init();
+      
+      // If already logged in, redirect to dashboard
+      if (isLoggedIn) {
+        const user = Auth.getCurrentUser();
+        window.location.href = Auth.getDashboardUrl(user.role);
+        return;
+      }
+
+      // Password toggle
+      const passwordInput = document.getElementById('password');
+      const passwordToggle = document.getElementById('password-toggle');
+      
+      passwordToggle.addEventListener('click', () => {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+        passwordToggle.querySelector('i').className = `fas fa-eye${type === 'password' ? '' : '-slash'}`;
+      });
+
+      // Form submission
+      const form = document.getElementById('login-form');
+      const errorDiv = document.getElementById('login-error');
+      const errorMessage = document.getElementById('error-message');
+      const loginBtn = document.getElementById('login-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        // Disable button
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+        errorDiv.classList.remove('show');
+
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const result = Auth.login(email, password);
+
+        if (result.success) {
+          Utils.showToast('Login successful! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = Auth.getDashboardUrl(result.user.role);
+          }, 500);
+        } else {
+          errorMessage.textContent = result.error;
+          errorDiv.classList.add('show');
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<span>Sign In</span><i class="fas fa-arrow-right"></i>';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
