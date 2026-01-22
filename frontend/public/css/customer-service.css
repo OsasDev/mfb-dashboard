@@ -548,3 +548,316 @@
   font-size: 0.875rem;
   color: var(--text-muted);
 }
+
+/* Customer Detail Modal */
+.customer-profile-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.customer-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--bg-primary);
+  flex-shrink: 0;
+}
+
+.customer-header-info {
+  flex: 1;
+}
+
+.customer-header-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.customer-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.customer-header-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.customer-header-meta i {
+  color: var(--accent-primary);
+}
+
+.customer-quick-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.customer-quick-stat {
+  text-align: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.customer-quick-stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.customer-quick-stat-label {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Customer Detail Tabs */
+.customer-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg-tertiary);
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+
+.customer-tab {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.customer-tab:hover {
+  color: var(--text-primary);
+}
+
+.customer-tab.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.customer-tab-content {
+  display: none;
+}
+
+.customer-tab-content.active {
+  display: block;
+}
+
+/* Customer Info Grid */
+.customer-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .customer-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.customer-info-item {
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.customer-info-label {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.customer-info-value {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Customer Transaction/Loan List */
+.customer-data-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.customer-data-filters .form-select,
+.customer-data-filters .form-input {
+  min-width: 150px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.customer-data-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.customer-data-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.75rem;
+  transition: var(--transition);
+}
+
+.customer-data-item:hover {
+  background: var(--bg-hover);
+}
+
+.customer-data-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.customer-data-icon.credit {
+  background: rgba(0, 212, 170, 0.15);
+  color: var(--accent-primary);
+}
+
+.customer-data-icon.debit {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--accent-danger);
+}
+
+.customer-data-icon.loan {
+  background: rgba(14, 165, 233, 0.15);
+  color: var(--accent-secondary);
+}
+
+.customer-data-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.customer-data-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-data-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.customer-data-amount {
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+  text-align: right;
+}
+
+.customer-data-amount.credit {
+  color: var(--accent-primary);
+}
+
+.customer-data-amount.debit {
+  color: var(--accent-danger);
+}
+
+.customer-data-status {
+  text-align: right;
+}
+
+/* Dashboard Filters */
+.dashboard-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filter-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-input {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  min-width: 140px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+}
+
+/* No Data State */
+.no-data-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+.no-data-state i {
+  font-size: 2rem;
+  opacity: 0.5;
+  margin-bottom: 0.75rem;
+}
