@@ -1,8 +1,8 @@
 {
   "sheetsUrl": {
-    "transactions": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=0&single=true&output=csv",
-    "customers": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=1&single=true&output=csv",
-    "loans": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=2&single=true&output=csv"
+    "transactions": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?output=csv",
+    "customers": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=1155990797&single=true&output=csv",
+    "loans": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZZt5nioqGNCxHVb4BZynfFkxCM2UtWBgEFq-Gft0Es4Y23u84cTIHSnDWy3Wi1vOAl0org-GakbAT/pub?gid=1620890621&single=true&output=csv"
   },
   "complaintCategories": [
     "Account Issues",
