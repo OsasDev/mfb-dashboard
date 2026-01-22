@@ -71,7 +71,9 @@ const Auth = {
       'CEO': 'roles/ceo-coo.html',
       'COO': 'roles/ceo-coo.html',
       'CFO': 'roles/cfo.html',
-      'CustomerService': 'roles/customer-service.html'
+      'CustomerService': 'roles/customer-service.html',
+      'Operations': 'roles/operations.html',
+      'LoanRecovery': 'roles/loan-recovery.html'
     };
     return dashboards[role] || 'index.html';
   },
