@@ -10,6 +10,8 @@ from typing import List
 import uuid
 from datetime import datetime, timezone
 
+from routes import complaints_router, set_complaints_db
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -18,6 +20,9 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Set database for complaints module
+set_complaints_db(db)
 
 # Create the main app without a prefix
 app = FastAPI()
