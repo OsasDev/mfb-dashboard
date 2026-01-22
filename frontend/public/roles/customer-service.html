@@ -85,6 +85,23 @@
             <p class="page-subtitle">Complaint management and customer support</p>
           </div>
           <div class="header-actions">
+            <div class="dropdown" style="position: relative; display: inline-block;">
+              <button class="btn btn-secondary" id="export-btn" data-testid="export-btn">
+                <i class="fas fa-download"></i>
+                Export
+              </button>
+              <div class="dropdown-menu" id="export-menu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 0.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); min-width: 200px; box-shadow: var(--shadow-lg); z-index: 100;">
+                <div class="dropdown-item" onclick="exportComplaintsCSV()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                  <i class="fas fa-file-csv"></i> Complaints (CSV)
+                </div>
+                <div class="dropdown-item" onclick="exportComplaintsExcel()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                  <i class="fas fa-file-excel"></i> Complaints (Excel)
+                </div>
+                <div class="dropdown-item" onclick="exportComplaintsPDF()" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                  <i class="fas fa-file-pdf"></i> Complaints Report (PDF)
+                </div>
+              </div>
+            </div>
             <button class="btn btn-primary" id="new-complaint-btn" data-testid="new-complaint-btn">
               <i class="fas fa-plus"></i>
               New Complaint
