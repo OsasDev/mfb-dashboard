@@ -410,6 +410,7 @@
   <script src="../js/sheets-api.js"></script>
   <script src="../js/complaints.js"></script>
   <script src="../js/app.js"></script>
+  <script src="../js/export.js"></script>
   <script src="../js/customer-service-charts.js"></script>
   <script>
     let appData = null;
@@ -427,9 +428,66 @@
       renderDashboard();
       setupNavigation();
       setupEventListeners();
+      setupExportDropdown();
       populateStaffDropdown();
       App.setupModals();
     });
+
+    // Export dropdown toggle
+    function setupExportDropdown() {
+      const exportBtn = document.getElementById('export-btn');
+      const exportMenu = document.getElementById('export-menu');
+      
+      exportBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exportMenu.style.display = exportMenu.style.display === 'none' ? 'block' : 'none';
+      });
+
+      document.addEventListener('click', () => {
+        exportMenu.style.display = 'none';
+      });
+
+      document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('mouseenter', () => {
+          item.style.background = 'var(--bg-hover)';
+          item.style.color = 'var(--text-primary)';
+        });
+        item.addEventListener('mouseleave', () => {
+          item.style.background = 'transparent';
+          item.style.color = 'var(--text-secondary)';
+        });
+      });
+    }
+
+    function exportComplaintsCSV() {
+      const complaints = Complaints.getAll();
+      if (!complaints.length) {
+        Utils.showToast('No complaints to export', 'error');
+        return;
+      }
+      const data = ExportUtils.prepareComplaintsExport(complaints);
+      ExportUtils.toCSV(data, 'PayMFB_Complaints_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportComplaintsExcel() {
+      const complaints = Complaints.getAll();
+      if (!complaints.length) {
+        Utils.showToast('No complaints to export', 'error');
+        return;
+      }
+      const data = ExportUtils.prepareComplaintsExport(complaints);
+      ExportUtils.toExcel(data, 'PayMFB_Complaints_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportComplaintsPDF() {
+      const complaints = Complaints.getAll();
+      if (!complaints.length) {
+        Utils.showToast('No complaints to export', 'error');
+        return;
+      }
+      const data = ExportUtils.prepareComplaintsExport(complaints);
+      ExportUtils.toPDF(data, 'Complaints Report', 'PayMFB_Complaints_Report');
+    }
 
     function setupNavigation() {
       document.querySelectorAll('.nav-item').forEach(item => {
