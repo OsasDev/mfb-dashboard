@@ -191,6 +191,139 @@
         </div>
       </section>
 
+      <!-- Transaction Analytics Section -->
+      <section id="transaction-analytics" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Transaction Analytics</h1>
+            <p class="page-subtitle">Comprehensive transaction insights and route analysis</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" id="refresh-txn-btn" data-testid="refresh-txn-btn">
+              <i class="fas fa-sync-alt"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Transaction Stats Summary -->
+        <div class="service-summary" id="txn-summary" data-testid="txn-summary">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Success vs Failed Trend</h3>
+                <p class="card-subtitle">Last 30 days</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="successTrendChart" data-testid="success-trend-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Transaction Routes</h3>
+                <p class="card-subtitle">Distribution by processing route</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="routesChart" data-testid="routes-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Transaction Types</h3>
+                <p class="card-subtitle">Volume by type</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="typesChart" data-testid="types-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Channels</h3>
+                <p class="card-subtitle">Volume by channel</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="channelsChart" data-testid="channels-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- All Transactions Section -->
+      <section id="all-transactions" class="dashboard-section" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">All Transactions</h1>
+            <p class="page-subtitle">Complete transaction history with detailed filters</p>
+          </div>
+          <div class="header-actions">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="transaction-search" class="form-input" placeholder="Search transactions..." data-testid="transaction-search">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="dashboard-filters" style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); margin-bottom: 1.5rem;">
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Date Range</label>
+            <select id="txn-date-filter" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 150px;" data-testid="txn-date-filter">
+              <option value="7">Last 7 Days</option>
+              <option value="30" selected>Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Status</label>
+            <select id="txn-status-filter" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 120px;" data-testid="txn-status-filter">
+              <option value="">All</option>
+              <option value="Success">Success</option>
+              <option value="Successful">Successful</option>
+              <option value="Failed">Failed</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Route</label>
+            <select id="txn-route-filter" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 150px;" data-testid="txn-route-filter">
+              <option value="">All Routes</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Type</label>
+            <select id="txn-type-filter-ops" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 150px;" data-testid="txn-type-filter-ops">
+              <option value="">All Types</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Channel</label>
+            <select id="txn-channel-filter-ops" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 150px;" data-testid="txn-channel-filter-ops">
+              <option value="">All Channels</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div id="transactions-table" data-testid="transactions-table">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
       <!-- Performance Section -->
       <section id="performance" class="dashboard-section" style="display: none;">
         <div class="page-header">
