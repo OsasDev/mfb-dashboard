@@ -243,3 +243,42 @@ agent_communication:
       and can analyze success vs failed rates, route distribution, and performance metrics.
       
       READY FOR FRONTEND TESTING.
+  
+  - agent: "main"
+    message: |
+      LOAN RECOVERY PORTAL - Customer Information Enhancement Complete
+      
+      Successfully added customer contact information to all overdue loan views:
+      
+      OVERDUE LOANS CARDS:
+      - Now display customer name (bold, prominent)
+      - Phone number with phone icon
+      - Email address with envelope icon
+      - All information visible at a glance without clicking
+      
+      LOAN DETAIL MODAL:
+      - New "Customer Information" section at the top
+      - Customer Name (highlighted)
+      - Customer ID (monospace font)
+      - Phone Number (clickable tel: link with icon)
+      - Email Address (clickable mailto: link with icon)
+      - Address (conditionally displayed if available)
+      
+      SEARCH ENHANCEMENT:
+      - Search now includes customer name, phone, and email fields
+      - Can find loans by any customer identifier
+      
+      AFFECTED VIEWS:
+      - Overview > Critical Overdue Loans
+      - Overdue Loans section (all filtered views)
+      - NPL Cases section
+      
+      DATA ENRICHMENT:
+      - Created enrichLoansWithCustomerData() function
+      - Joins loan data with customer data from Google Sheets
+      - Handles missing customer data gracefully with "N/A" fallbacks
+      
+      This enhancement makes it much easier for loan recovery staff to contact customers
+      directly from the dashboard without needing to look up contact information separately.
+      
+      READY FOR FRONTEND TESTING.
