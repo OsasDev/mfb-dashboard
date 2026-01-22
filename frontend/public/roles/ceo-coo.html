@@ -124,6 +124,48 @@
           </div>
         </div>
 
+        <!-- Filters -->
+        <div class="dashboard-filters" style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); margin-bottom: 1.5rem; align-items: flex-end;">
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Date Range</label>
+            <select id="date-range-filter" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 150px;" data-testid="date-range-filter">
+              <option value="7">Last 7 Days</option>
+              <option value="30" selected>Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Transaction Type</label>
+            <select id="txn-type-filter" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 150px;" data-testid="txn-type-filter">
+              <option value="">All Types</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Channel</label>
+            <select id="channel-filter" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 150px;" data-testid="channel-filter">
+              <option value="">All Channels</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <label class="filter-label" style="font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Status</label>
+            <select id="status-filter" class="form-select" style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; min-width: 130px;" data-testid="status-filter">
+              <option value="">All Status</option>
+              <option value="Successful">Successful</option>
+              <option value="Failed">Failed</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+            <button class="btn btn-primary btn-sm" onclick="applyFilters()" data-testid="apply-filters-btn">
+              <i class="fas fa-filter"></i> Apply
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="clearFilters()" data-testid="clear-filters-btn">
+              <i class="fas fa-times"></i> Clear
+            </button>
+          </div>
+        </div>
+
         <!-- KPI Cards -->
         <div class="executive-summary" id="kpi-cards" data-testid="kpi-cards">
           <!-- Populated by JS -->
