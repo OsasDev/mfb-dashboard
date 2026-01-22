@@ -260,12 +260,38 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Transaction Analytics</h1>
-            <p class="page-subtitle">Detailed transaction insights</p>
+            <p class="page-subtitle">Detailed transaction insights and route analysis</p>
           </div>
         </div>
 
         <div class="stats-grid" id="transaction-stats" data-testid="transaction-stats">
           <!-- Populated by JS -->
+        </div>
+
+        <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Transaction Routes</h3>
+                <p class="card-subtitle">Distribution by processing route</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="ceo-routes-chart" data-testid="ceo-routes-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Success Rate by Route</h3>
+                <p class="card-subtitle">Performance comparison</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="ceo-route-performance-chart" data-testid="ceo-route-performance-chart"></canvas>
+            </div>
+          </div>
         </div>
 
         <div class="data-section">
