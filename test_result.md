@@ -204,6 +204,15 @@ frontend:
           - Updated search functionality to include customer name, phone, and email
           All overdue loan views (Overview, Overdue Loans, NPL Cases) now display full customer contact details.
           Needs testing to verify customer information displays correctly.
+      - working: false
+        agent: "main"
+        comment: |
+          Fixed customer name mapping issue:
+          - Corrected enrichLoansWithCustomerData() to properly construct customer name from first_name and last_name fields
+          - Customer data structure uses first_name and last_name, not customer_name
+          - Added proper fallback handling when customer data is missing
+          - Customer names should now display correctly instead of "Unknown Customer"
+          Ready for testing to verify fix works.
 
 metadata:
   created_by: "main_agent"
