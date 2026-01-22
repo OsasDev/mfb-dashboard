@@ -5,7 +5,7 @@ const Complaints = {
   complaints: [],
   config: null,
   useBackend: true, // Toggle for backend API usage
-  apiBase: '/api/complaints',
+  apiBase: null, // Will be set from config
 
   // Initialize complaints system
   async init() {
@@ -14,6 +14,18 @@ const Complaints = {
       const configResponse = await fetch('/data/config.json');
       if (!configResponse.ok) throw new Error('Failed to load config');
       this.config = await configResponse.json();
+      
+      // Get API base from environment or use relative path
+      // In production, this should be configured
+      this.apiBase = this.config.apiUrl || '/api/complaints';
+      
+      // If we're on the static site, use the actual backend URL
+      if (window.location.port === '3000') {
+        // Get the backend URL from the environment
+        // This assumes the backend is accessible via the same domain or via proxy
+        const backendUrl = this.config.backendUrl || 'https://jqp6v4-8001.csb.app';
+        this.apiBase = backendUrl + '/api/complaints';
+      }
       
       // Try to load from backend first
       if (this.useBackend) {
@@ -25,7 +37,7 @@ const Complaints = {
             return true;
           }
         } catch (err) {
-          console.warn('Backend unavailable, falling back to localStorage');
+          console.warn('Backend unavailable, falling back to localStorage', err);
         }
       }
       
