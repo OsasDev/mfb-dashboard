@@ -656,12 +656,21 @@
       
       return loans.map(loan => {
         const customer = appData.customers.find(c => c.customer_id === loan.customer_id);
+        if (customer) {
+          return {
+            ...loan,
+            customer_name: `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown Customer',
+            customer_phone: customer.phone_number || 'N/A',
+            customer_email: customer.email || 'N/A',
+            customer_address: customer.address || 'N/A'
+          };
+        }
         return {
           ...loan,
-          customer_name: customer?.customer_name || 'Unknown Customer',
-          customer_phone: customer?.phone_number || 'N/A',
-          customer_email: customer?.email || 'N/A',
-          customer_address: customer?.address || 'N/A'
+          customer_name: 'Unknown Customer',
+          customer_phone: 'N/A',
+          customer_email: 'N/A',
+          customer_address: 'N/A'
         };
       });
     }
