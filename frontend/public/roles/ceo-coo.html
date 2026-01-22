@@ -311,6 +311,7 @@
   <script src="../js/sheets-api.js"></script>
   <script src="../js/complaints.js"></script>
   <script src="../js/app.js"></script>
+  <script src="../js/export.js"></script>
   <script src="../js/ceo-coo-charts.js"></script>
   <script>
     let appData = null;
@@ -333,6 +334,9 @@
       // Setup navigation
       setupNavigation();
 
+      // Setup export dropdown
+      setupExportDropdown();
+
       // Refresh button
       document.getElementById('refresh-btn').addEventListener('click', async () => {
         appData = await App.refreshData();
@@ -342,6 +346,119 @@
         }
       });
     });
+
+    // Export dropdown toggle
+    function setupExportDropdown() {
+      const exportBtn = document.getElementById('export-btn');
+      const exportMenu = document.getElementById('export-menu');
+      
+      exportBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exportMenu.style.display = exportMenu.style.display === 'none' ? 'block' : 'none';
+      });
+
+      // Close on click outside
+      document.addEventListener('click', () => {
+        exportMenu.style.display = 'none';
+      });
+
+      // Hover effect for dropdown items
+      document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('mouseenter', () => {
+          item.style.background = 'var(--bg-hover)';
+          item.style.color = 'var(--text-primary)';
+        });
+        item.addEventListener('mouseleave', () => {
+          item.style.background = 'transparent';
+          item.style.color = 'var(--text-secondary)';
+        });
+      });
+    }
+
+    // Export functions
+    function exportTransactionsCSV() {
+      if (!appData) return;
+      const data = ExportUtils.prepareTransactionsExport(appData.transactions);
+      ExportUtils.toCSV(data, 'PayMFB_Transactions_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportCustomersCSV() {
+      if (!appData) return;
+      const data = ExportUtils.prepareCustomersExport(appData.customers);
+      ExportUtils.toCSV(data, 'PayMFB_Customers_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportLoansCSV() {
+      if (!appData) return;
+      const data = ExportUtils.prepareLoansExport(appData.loans);
+      ExportUtils.toCSV(data, 'PayMFB_Loans_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportTransactionsExcel() {
+      if (!appData) return;
+      const data = ExportUtils.prepareTransactionsExport(appData.transactions);
+      ExportUtils.toExcel(data, 'PayMFB_Transactions_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportCustomersExcel() {
+      if (!appData) return;
+      const data = ExportUtils.prepareCustomersExport(appData.customers);
+      ExportUtils.toExcel(data, 'PayMFB_Customers_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportLoansExcel() {
+      if (!appData) return;
+      const data = ExportUtils.prepareLoansExport(appData.loans);
+      ExportUtils.toExcel(data, 'PayMFB_Loans_' + new Date().toISOString().split('T')[0]);
+    }
+
+    function exportAnalyticsPDF() {
+      if (!appData) return;
+      
+      const txn = SheetsAPI.getTransactionAnalytics(appData.transactions);
+      const cust = SheetsAPI.getCustomerAnalytics(appData.customers);
+      const loan = SheetsAPI.getLoanAnalytics(appData.loans);
+
+      const analytics = {
+        sections: [
+          {
+            title: 'Transaction Summary',
+            metrics: [
+              { label: 'Total Transactions', value: Utils.formatNumber(txn.total) },
+              { label: 'Total Value', value: Utils.formatCurrency(txn.totalAmount) },
+              { label: 'Success Rate', value: Utils.formatPercent(txn.successRate) },
+              { label: 'Average Transaction', value: Utils.formatCurrency(txn.averageAmount) }
+            ],
+            breakdown: txn.byType,
+            breakdownLabel: 'Transaction Type'
+          },
+          {
+            title: 'Customer Analytics',
+            metrics: [
+              { label: 'Total Customers', value: Utils.formatNumber(cust.total) },
+              { label: 'Average Income', value: Utils.formatCurrency(cust.averageIncome) },
+              { label: 'KYC Verified', value: Utils.formatNumber(cust.byKYCStatus['Verified'] || 0) },
+              { label: 'Active Accounts', value: Utils.formatNumber(cust.byKYCStatus['Complete'] || cust.total) }
+            ],
+            breakdown: cust.byState,
+            breakdownLabel: 'State'
+          },
+          {
+            title: 'Loan Portfolio',
+            metrics: [
+              { label: 'Total Disbursed', value: Utils.formatCurrency(loan.totalDisbursed) },
+              { label: 'Outstanding Balance', value: Utils.formatCurrency(loan.totalOutstanding) },
+              { label: 'NPL Ratio', value: Utils.formatPercent(loan.nplRatio) },
+              { label: 'Collection Rate', value: Utils.formatPercent(loan.collectionRate) }
+            ],
+            breakdown: loan.byStatus,
+            breakdownLabel: 'Loan Status'
+          }
+        ]
+      };
+
+      ExportUtils.toAnalyticsPDF(analytics, 'Executive Analytics Report');
+    }
 
     function setupNavigation() {
       document.querySelectorAll('.nav-item').forEach(item => {
