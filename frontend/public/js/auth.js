@@ -105,6 +105,27 @@ const Auth = {
   // Get all customer service staff
   getCustomerServiceStaff() {
     return this.users.filter(u => u.role === 'CustomerService');
+  },
+
+  // Get all operations staff
+  getOperationsStaff() {
+    return this.users.filter(u => u.role === 'Operations');
+  },
+
+  // Get all loan recovery staff
+  getLoanRecoveryStaff() {
+    return this.users.filter(u => u.role === 'LoanRecovery');
+  },
+
+  // Get all staff for escalation options
+  getEscalationTargets() {
+    return [
+      { id: 'team-lead', name: 'Team Lead', department: 'Customer Service' },
+      { id: 'operations', name: 'Operations Team', department: 'Operations' },
+      { id: 'loan-recovery', name: 'Loan Recovery Team', department: 'Loan Recovery' },
+      { id: 'manager', name: 'Manager', department: 'Management' },
+      { id: 'coo', name: 'COO', department: 'Executive' }
+    ];
   }
 };
 
