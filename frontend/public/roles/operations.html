@@ -373,6 +373,22 @@
     </div>
   </div>
 
+  <!-- Transaction Detail Modal -->
+  <div class="modal-overlay" id="transaction-detail-modal" data-testid="transaction-detail-modal">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Transaction Details</h2>
+        <button class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="transaction-detail-content" data-testid="transaction-detail-content">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="App.hideModal('transaction-detail-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container" class="toast-container"></div>
 
   <script src="../js/utils.js"></script>
