@@ -7,13 +7,9 @@ const Complaints = {
   // Initialize complaints system
   async init() {
     try {
-      let configResponse;
-      try {
-        configResponse = await fetch('./data/config.json');
-        if (!configResponse.ok) throw new Error('Not found');
-      } catch {
-        configResponse = await fetch('../data/config.json');
-      }
+      // Use absolute path for config
+      const configResponse = await fetch('/data/config.json');
+      if (!configResponse.ok) throw new Error('Failed to load config');
       this.config = await configResponse.json();
       
       // Load complaints from localStorage

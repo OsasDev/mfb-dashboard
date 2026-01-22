@@ -7,14 +7,9 @@ const Auth = {
   // Initialize auth
   async init() {
     try {
-      // Try both paths for root and role pages
-      let response;
-      try {
-        response = await fetch('./data/users.json');
-        if (!response.ok) throw new Error('Not found');
-      } catch {
-        response = await fetch('../data/users.json');
-      }
+      // Use absolute path to ensure correct resolution
+      const response = await fetch('/data/users.json');
+      if (!response.ok) throw new Error('Failed to load users');
       const data = await response.json();
       this.users = data.users;
       

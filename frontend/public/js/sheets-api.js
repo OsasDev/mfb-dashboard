@@ -13,13 +13,9 @@ const SheetsAPI = {
   // Initialize with config
   async init() {
     try {
-      let response;
-      try {
-        response = await fetch('./data/config.json');
-        if (!response.ok) throw new Error('Not found');
-      } catch {
-        response = await fetch('../data/config.json');
-      }
+      // Use absolute path for config
+      const response = await fetch('/data/config.json');
+      if (!response.ok) throw new Error('Failed to load config');
       this.config = await response.json();
       return true;
     } catch (error) {
