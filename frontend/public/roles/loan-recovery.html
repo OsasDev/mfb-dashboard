@@ -597,8 +597,9 @@
     }
 
     function renderCriticalLoans(loans) {
+      const enrichedLoans = enrichLoansWithCustomerData(loans);
       const container = document.getElementById('critical-loans');
-      if (!loans.length) {
+      if (!enrichedLoans.length) {
         container.innerHTML = `
           <div class="complaints-empty">
             <i class="fas fa-check-circle complaints-empty-icon" style="color: var(--accent-primary);"></i>
@@ -609,7 +610,7 @@
         return;
       }
 
-      container.innerHTML = loans.map(l => {
+      container.innerHTML = enrichedLoans.map(l => {
         const daysOverdue = getDaysOverdue(l);
         const priorityClass = daysOverdue > 90 ? 'critical' : daysOverdue > 60 ? 'high' : daysOverdue > 30 ? 'medium' : 'low';
         
@@ -619,7 +620,19 @@
               <span class="complaint-ticket">${l.loan_id}</span>
               <span class="complaint-time">${daysOverdue} days overdue</span>
             </div>
-            <div class="complaint-customer">${l.customer_id}</div>
+            <div class="complaint-customer" style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">
+              ${l.customer_name || l.customer_id}
+            </div>
+            <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 0.375rem;">
+                <i class="fas fa-phone" style="font-size: 0.75rem;"></i>
+                <span>${l.customer_phone || 'N/A'}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.375rem;">
+                <i class="fas fa-envelope" style="font-size: 0.75rem;"></i>
+                <span>${l.customer_email || 'N/A'}</span>
+              </div>
+            </div>
             <div class="complaint-category">${l.loan_product} • ${l.loan_status}</div>
             <div class="complaint-description">
               Outstanding: ${Utils.formatCurrency(l.total_outstanding_balance)} | 
