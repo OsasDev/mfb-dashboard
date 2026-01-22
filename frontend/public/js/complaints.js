@@ -7,7 +7,13 @@ const Complaints = {
   // Initialize complaints system
   async init() {
     try {
-      const configResponse = await fetch('./data/config.json');
+      let configResponse;
+      try {
+        configResponse = await fetch('./data/config.json');
+        if (!configResponse.ok) throw new Error('Not found');
+      } catch {
+        configResponse = await fetch('../data/config.json');
+      }
       this.config = await configResponse.json();
       
       // Load complaints from localStorage
@@ -19,17 +25,9 @@ const Complaints = {
     }
   },
 
-  // Initialize from role pages
+  // Initialize from role pages (deprecated - use init instead)
   async initFromRole() {
-    try {
-      const configResponse = await fetch('../data/config.json');
-      this.config = await configResponse.json();
-      this.complaints = Utils.storage.get('mfb_complaints', []);
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize complaints from role:', error);
-      return false;
-    }
+    return this.init();
   },
 
   // Get all complaints
